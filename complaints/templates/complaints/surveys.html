@@ -1,0 +1,445 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>📊 Eco-Saviour | Our Surveys</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .survey-card {
+            transition: all 0.3s ease;
+            border: 1px solid #f0f0f0;
+            background: white;
+            border-radius: 16px;
+            overflow: hidden;
+        }
+        .survey-card:hover {
+            transform: translateY(-6px);
+            box-shadow: 0 12px 40px rgba(0,0,0,0.12);
+        }
+        .survey-card img {
+            width: 100%;
+            height: 240px;
+            object-fit: cover;
+        }
+        .badge-survey {
+            display: inline-block;
+            padding: 2px 12px;
+            border-radius: 20px;
+            font-size: 9px;
+            font-weight: 700;
+            text-transform: uppercase;
+        }
+        .badge-completed { background: #d1fae5; color: #065f46; }
+        .badge-ongoing { background: #fef3c7; color: #92400e; }
+        .badge-planned { background: #dbeafe; color: #1e40af; }
+        
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.85);
+            backdrop-filter: blur(8px);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        .modal-overlay.active { display: flex; }
+        .modal-content {
+            background: white;
+            border-radius: 16px;
+            max-width: 650px;
+            width: 100%;
+            max-height: 90vh;
+            overflow-y: auto;
+            padding: 24px;
+            animation: slideIn 0.4s ease;
+        }
+        @keyframes slideIn {
+            from { transform: scale(0.95) translateY(20px); opacity: 0; }
+            to { transform: scale(1) translateY(0); opacity: 1; }
+        }
+        .modal-close {
+            float: right;
+            font-size: 28px;
+            cursor: pointer;
+            background: none;
+            border: none;
+            color: #6b7280;
+        }
+        .modal-close:hover { color: #1f2937; }
+        .modal-content img {
+            width: 100%;
+            height: 300px;
+            object-fit: cover;
+            border-radius: 12px;
+            margin-bottom: 12px;
+        }
+        @media (max-width: 768px) {
+            .survey-card img { height: 180px; }
+            .modal-content img { height: 200px; }
+        }
+        .filter-btn {
+            padding: 4px 14px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 600;
+            border: 2px solid #e5e7eb;
+            background: white;
+            color: #4b5563;
+            transition: all 0.3s;
+            cursor: pointer;
+        }
+        .filter-btn:hover { border-color: #064e3b; color: #064e3b; }
+        .filter-btn.active { background: #064e3b; border-color: #064e3b; color: white; }
+    </style>
+</head>
+<body>
+
+    <!-- Header -->
+    <header class="bg-emerald-900 text-white p-3 shadow-lg">
+        <div class="max-w-7xl mx-auto flex items-center justify-between flex-wrap gap-2">
+            <div class="flex items-center gap-2">
+                <span class="text-2xl">📊</span>
+                <span class="font-bold">Eco-Saviour Amdavad</span>
+            </div>
+            <nav class="flex items-center gap-3 text-sm">
+                <a href="/animal-hospitals/" class="hover:text-emerald-200 transition">🏥 Clinics</a>
+                <a href="/problems-solutions/" class="hover:text-emerald-200 transition">🌍 Problems</a>
+                <a href="/disposal-guide/" class="hover:text-emerald-200 transition">♻️ Disposal</a>
+                <a href="#" class="text-emerald-200 font-semibold">📊 Surveys</a>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Main -->
+    <main class="max-w-7xl mx-auto px-4 py-6">
+
+        <!-- Hero -->
+        <section class="text-center mb-8">
+            <h1 class="text-2xl md:text-3xl font-bold text-emerald-900">📸 Our Survey Gallery</h1>
+            <p class="text-gray-600 text-sm max-w-xl mx-auto">Documenting environmental issues, wildlife observations, and community impact through surveys</p>
+            {% comment %} <div class="flex flex-wrap justify-center gap-1 mt-3" id="filterContainer">
+                <button class="filter-btn active" data-filter="all">All</button>
+                <button class="filter-btn" data-filter="completed">✅ Completed</button>
+                <button class="filter-btn" data-filter="ongoing">🔄 Ongoing</button>
+                <button class="filter-btn" data-filter="planned">📋 Planned</button>
+                <button class="filter-btn" data-filter="pollution">🌊 Pollution</button>
+                <button class="filter-btn" data-filter="wildlife">🐾 Wildlife</button>
+                <button class="filter-btn" data-filter="environment">🌿 Environment</button>
+                <button class="filter-btn" data-filter="waste">♻️ Waste</button>
+            </div> {% endcomment %}
+        </section>
+
+        <!-- Survey Grid -->
+        <section>
+            <div class="flex justify-between items-center mb-3">
+                <h2 class="text-lg font-bold text-emerald-900">📋 Survey Gallery</h2>
+                <span id="resultCount" class="text-xs text-gray-500"></span>
+            </div>
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6" id="surveyGrid">
+                <!-- JavaScript will populate this -->
+            </div>
+        </section>
+
+        <!-- Call to Action -->
+        <section class="mt-10 bg-gradient-to-r from-emerald-900 to-emerald-700 rounded-xl p-6 text-white text-center">
+            <h2 class="text-lg font-bold">📋 Want to Contribute?</h2>
+            <p class="text-emerald-100 text-sm">Help us document environmental issues in Ahmedabad</p>
+            <div class="flex flex-wrap justify-center gap-2 mt-3">
+                <a href="#" class="bg-white text-emerald-900 px-6 py-2 rounded-full font-semibold text-sm hover:bg-emerald-50">Submit Survey</a>
+                <a href="#" class="border border-white px-6 py-2 rounded-full font-semibold text-sm hover:bg-white hover:text-emerald-900">Volunteer</a>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-gray-900 text-gray-400 text-center py-3 mt-4 text-xs">
+        <p>© 2024 Eco-Saviour Amdavad | Together for a Greener Future 🌿</p>
+    </footer>
+
+    <!-- Modal -->
+    <div class="modal-overlay" id="surveyModal">
+        <div class="modal-content">
+            <button class="modal-close" onclick="closeModal()">✕</button>
+            <div id="modalContent"></div>
+        </div>
+    </div>
+
+    <script>
+        // ================================================================
+        // 📊 SURVEY DATA - ADD YOUR IMAGES HERE
+        // ================================================================
+        // HOW TO ADD YOUR IMAGES:
+        // 1. Place your images in: static/images/surveys/
+        // 2. Reference them as: "/static/images/surveys/your-image.jpg"
+        // 3. Or use external URLs: "https://i.imgur.com/your-image.jpg"
+        // ================================================================
+
+        const surveysData = [
+            {
+                id: 1,
+                title: "Dump yard survey",
+                category: "pollution",
+                status: "completed",
+                image: "https://res.cloudinary.com/dvuvpsxk0/image/upload/v1782723186/WhatsApp_Image_2026-06-23_at_12.09.04_PM_mxnapw.jpg",
+                description: "Survey conducted documenting plastic waste and other types of waste accumulation and its impact on animals and humans.",
+                findings: "Found over 2,500 kg of plastic waste, with 60% being single-use plastics. Major impact on human and animal health sites.",
+                date: "June 2026"
+            },
+            {
+                id: 2,
+                title: "Stray Animal and feeding waste",
+                category: "wildlife",
+                status: "completed",
+                image: "https://res.cloudinary.com/dvuvpsxk0/image/upload/v1782723662/WhatsApp_Image_2026-06-19_at_4.49.28_PM_uirybr.jpg",
+                description: "A comprehensive survey of stray animal populations in palanpur city and feeding waste materials.",
+                findings: "Documented 2,340 stray dogs and 1,280 stray cats and many much cows on street feeding waste disposal.",
+                date: "June 2026"
+            },
+            {
+                id: 3,
+                title: "Urban area (Palanpur)",
+                category: "wildlife",
+                status: "completed",
+                image: "https://res.cloudinary.com/dvuvpsxk0/image/upload/v1782723660/WhatsApp_Image_2026-06-19_at_4.49.49_PM_t4qa1m.jpg",
+                description: "This survey focuses on the persistent issue of illegal waste dumping in residential areas, specifically highlighting the contradiction between public sanitation efforts and community behavior. Despite the installation of visible 'DO NOT THROW TRASH HERE' signage, sites like the one pictured—where construction debris and refuse accumulate directly beneath a prohibition notice—demonstrate a clear breakdown in compliance. These findings suggest that current deterrents are insufficient and indicate an urgent need for more effective waste management strategies or stricter enforcement to maintain neighborhood cleanliness.",
+                findings: "",
+                date: "June 2026"
+            },
+            {
+                id: 4,
+                title: "Local green spaces",
+                category: "waste",
+                status: "completed",
+                image: "https://res.cloudinary.com/dvuvpsxk0/image/upload/v1782723661/WhatsApp_Image_2026-06-21_at_7.50.17_PM_xan9y2.jpg",
+                description: "This survey documents the alarming encroachment of waste into natural, wooded areas, as evidenced in image. The accumulation of diverse refuse—including plastic bags, debris, and miscellaneous litter—directly amidst tree vegetation underscores a critical degradation of local green spaces. Such findings highlight the severe impact of improper waste disposal on environmental health, indicating that without immediate intervention and sustainable cleanup initiatives, these vulnerable ecosystems will continue to suffer from increasing pollution levels",
+                findings: "",
+                date: "June 2026"
+            },
+            {
+                id: 5,
+                title: "Urban area water wastage (Ahmedabad)",
+                category: "environment",
+                status: "completed",
+                image: "https://res.cloudinary.com/dvuvpsxk0/image/upload/v1782723660/WhatsApp_Image_2026-06-19_at_4.56.42_PM_i3qzhc.jpg",
+                description: "This survey documents a critical public health and infrastructure concern in a residential zone, as illustrated in the image. The image captures severe water stagnation and drainage overflow, leading to pooled, contaminated-looking runoff directly outside residential property gates. This persistent drainage failure not only compromises road conditions and neighborhood hygiene but also creates potential breeding grounds for pathogens, posing significant health risks to local residents. These findings underscore an urgent necessity for infrastructure repair and improved urban drainage management to ensure a safer, healthier living environment.",
+                findings: "",
+                date: "June 2026"
+            },
+            {
+                id: 6,
+                title: "conversation with municipal officer",
+                category: "pollution",
+                status: "completed",
+                image: "https://res.cloudinary.com/dvuvpsxk0/image/upload/v1782723659/WhatsApp_Image_2026-06-23_at_12.09.06_PM_r3wdih.jpg",
+                description: "This survey examines the severe impact of large-scale waste disposal sites on local environments and public health, as depicted in image. The image captures a field investigation occurring adjacent to a massive, open-air waste accumulation area, highlighting the proximity of hazardous dumping grounds to populated zones and their immediate effect on air quality, as evidenced by the observer covering their nose. These conditions not only threaten local wildlife and sanitation but also pose direct health risks to individuals navigating these polluted areas. The findings underscore a critical need for sustainable waste management practices and the remediation of such environmentally compromised sites to ensure the well-being of the surrounding community.",
+                findings: "",
+                date: "June 2026"
+            },
+            {
+                id: 7,
+                title: "Open dumping in Urban areas",
+                category: "pollution",
+                status: "completed",
+                image: "https://res.cloudinary.com/dvuvpsxk0/image/upload/v1782727920/WhatsApp_Image_2026-06-21_at_7.50.18_PM_uo2i5w.jpg",
+                description: "This survey documents the problematic accumulation of construction debris and household refuse on a vacant plot situated directly adjacent to a residential area, as captured in image. The presence of various plastic bags, concrete waste, and scattered debris in an open space near homes highlights a significant lapse in local waste disposal management and environmental maintenance. These findings point to a need for stricter oversight and proactive cleanup efforts to mitigate the potential health and sanitation risks posed to the neighborhood's residents",
+                findings: "",
+                date: "June 2026"
+            },
+            {
+                id: 8,
+                title: "Water Quality Testing - Lakes",
+                category: "environment",
+                status: "completed",
+                image: "https://res.cloudinary.com/dvuvpsxk0/image/upload/v1782723660/WhatsApp_Image_2026-06-22_at_4.52.46_PM_g97feg.jpg",
+                description: "This survey highlights a severe case of urban environmental neglect and infrastructure failure, as evidenced by image. The image displays a narrow alleyway severely compromised by an open, stagnant drainage channel filled with dark, polluted water and significant waste accumulation. This hazardous situation not only creates an unsightly and unsanitary environment for local residents but also poses substantial public health risks due to the potential for disease transmission and environmental degradation. These conditions underscore an urgent need for critical infrastructure intervention, regular waste management, and improved sewage systems to restore basic sanitation standards in this area.",
+                findings: "Survey to begin March 2024. Testing for pH, heavy metals, and bacterial contamination.",
+                date: "June 2026"
+            },
+            {
+                id: 9,
+                title: "Urban area pollution (Ahmedabad)",
+                category: "pollution",
+                status: "completed",
+                image: "https://res.cloudinary.com/dvuvpsxk0/image/upload/v1782728325/WhatsApp_Image_2026-06-29_at_3.48.16_PM_dlznqm.jpg",
+                description: "This survey highlights the ongoing issue of roadside littering, as captured in image. The image shows a volunteer documenting the accumulation of scattered waste along a sidewalk, underscoring the persistence of pollution in frequently used public spaces. Such documentation serves as a critical step in raising community awareness regarding sanitation habits and the importance of maintaining clean, litter-free urban environments.",
+                findings: "",
+                date: "June 2026"
+            },
+            {
+                id: 10,
+                title: "waste disposal near lake in urban area",
+                category: "pollution",
+                status: "completed",
+                image: "https://res.cloudinary.com/dvuvpsxk0/image/upload/v1782728647/WhatsApp_Image_2026-06-24_at_12.21.18_PM_pncjqb.jpg",
+                description: "This survey highlights the ongoing issue of lakeside waste disposal, as captured in image. The image shows a volunteer documenting the accumulation of scattered waste along a sidewalk, underscoring the persistence of pollution in frequently used public spaces. Such documentation serves as a critical step in raising community awareness regarding sanitation habits and the importance of maintaining clean, litter-free urban environments.",
+                findings: "",
+                date: "June 2026"
+            },
+            {
+                id: 11,
+                title: "waste disposal urban area",
+                category: "pollution",
+                status: "completed",
+                image: "https://res.cloudinary.com/dvuvpsxk0/image/upload/v1782723660/WhatsApp_Image_2026-06-21_at_7.51.09_PM_ebfl33.jpg",
+                description: "This survey highlights the ongoing issue of waste disposal, as captured in image. The image shows a volunteer documenting the accumulation of scattered waste along a sidewalk, underscoring the persistence of pollution in frequently used public spaces. Such documentation serves as a critical step in raising community awareness regarding sanitation habits and the importance of maintaining clean, litter-free urban environments.",
+                findings: "",
+                date: "June 2026"
+            },
+            {
+                id: 12,
+                title: "Air pollution",
+                category: "pollution",
+                status: "completed",
+                image: "https://res.cloudinary.com/dvuvpsxk0/image/upload/v1782729148/WhatsApp_Image_2026-06-29_at_4.01.57_PM_dvuwr9.jpg",
+                description: "This survey documents the potential impact of industrial activities on local air quality, as captured in image. The image displays a tall industrial chimney emitting visible smoke into the surrounding environment, highlighting concerns regarding emissions and their effect on neighborhood health and the local ecosystem. By documenting such sources of pollution, this survey aims to emphasize the necessity for stricter industrial environmental compliance and enhanced monitoring to ensure better air quality for the community.",
+                findings: "",
+                date: "June 2026"
+            }
+        ];
+
+        // ================================================================
+        // RENDER FUNCTION
+        // ================================================================
+        let currentFilter = 'all';
+
+        function renderSurveys(filter = 'all') {
+            const grid = document.getElementById('surveyGrid');
+            const resultCount = document.getElementById('resultCount');
+            if (!grid) return;
+
+            let filtered = filter === 'all' ? surveysData : 
+                surveysData.filter(item => item.status === filter || item.category === filter);
+
+            resultCount.textContent = `Showing ${filtered.length} of ${surveysData.length} surveys`;
+
+            if (filtered.length === 0) {
+                grid.innerHTML = `
+                    <div class="col-span-full text-center py-12">
+                        <div class="text-4xl mb-2">🔍</div>
+                        <p class="text-gray-500 text-sm">No surveys found for this filter</p>
+                    </div>
+                `;
+                return;
+            }
+
+            grid.innerHTML = filtered.map((item) => {
+                const statusBadge = {
+                    'completed': 'badge-completed',
+                    'ongoing': 'badge-ongoing',
+                    'planned': 'badge-planned'
+                }[item.status] || 'badge-planned';
+
+                const statusLabel = item.status.charAt(0).toUpperCase() + item.status.slice(1);
+
+                return `
+                    <div class="survey-card" onclick="openModal(${surveysData.indexOf(item)})">
+                        <img src="${item.image}" alt="${item.title}" loading="lazy" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22600%22 height=%22400%22%3E%3Crect fill=%22%23064e3b%22 width=%22600%22 height=%22400%22/%3E%3Ctext x=%22300%22 y=%22200%22 text-anchor=%22middle%22 fill=%22white%22 font-size=%2224%22%3E📊 No Image%3C/text%3E%3C/svg%3E'" />
+                        <div class="p-4">
+                            <div class="flex justify-between items-start gap-2">
+                                <h3 class="font-bold text-emerald-900 text-sm flex-1">${item.title}</h3>
+                                <span class="badge-survey ${statusBadge} whitespace-nowrap">${statusLabel}</span>
+                            </div>
+                            <p class="text-xs text-gray-600 mt-1 line-clamp-2">${item.description.substring(0, 80)}${item.description.length > 80 ? '...' : ''}</p>
+                            <div class="flex justify-between items-center mt-2 text-xs text-gray-400">
+                                <span>📅 ${item.date}</span>
+                                <span class="text-emerald-600">${item.category.charAt(0).toUpperCase() + item.category.slice(1)}</span>
+                            </div>
+                            <div class="mt-2 pt-2 border-t border-gray-100">
+                                <button class="w-full text-center text-xs text-emerald-600 hover:text-emerald-800 font-medium">
+                                    View Details →
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // ================================================================
+        // MODAL FUNCTIONS
+        // ================================================================
+        function openModal(index) {
+            const item = surveysData[index];
+            if (!item) return;
+
+            const modal = document.getElementById('surveyModal');
+            const content = document.getElementById('modalContent');
+
+            const statusBadge = {
+                'completed': 'badge-completed',
+                'ongoing': 'badge-ongoing',
+                'planned': 'badge-planned'
+            }[item.status] || 'badge-planned';
+
+            content.innerHTML = `
+                <button class="modal-close" onclick="closeModal()">✕</button>
+                <img src="${item.image}" alt="${item.title}" onerror="this.style.display='none'" />
+                <div class="flex items-center gap-3 mb-2 flex-wrap">
+                    <h2 class="text-xl font-bold text-emerald-900">${item.title}</h2>
+                    <span class="badge-survey ${statusBadge}">${item.status}</span>
+                    <span class="text-xs text-gray-500">${item.category}</span>
+                </div>
+                
+                <div class="bg-blue-50 p-3 rounded-lg mb-3 border-l-4 border-blue-500">
+                    <h4 class="font-semibold text-blue-700 text-sm">📋 Description</h4>
+                    <p class="text-sm text-gray-700">${item.description}</p>
+                </div>
+                
+                <div class="bg-emerald-50 p-3 rounded-lg mb-3 border-l-4 border-emerald-500">
+                    <h4 class="font-semibold text-emerald-700 text-sm">🔍 Key Findings</h4>
+                    <p class="text-sm text-gray-700">${item.findings}</p>
+                </div>
+                
+                <div class="text-sm text-gray-600 bg-gray-50 p-3 rounded-lg mb-3">
+                    📅 <strong>Date:</strong> ${item.date}
+                </div>
+                
+                <div class="flex gap-2">
+                    <button onclick="closeModal()" class="flex-1 bg-emerald-600 text-white py-2.5 rounded-lg text-sm font-semibold hover:bg-emerald-700 transition">
+                        Close
+                    </button>
+                    <button class="flex-1 bg-blue-600 text-white py-2.5 rounded-lg text-sm font-semibold hover:bg-blue-700 transition">
+                        📥 Download Report
+                    </button>
+                </div>
+            `;
+
+            modal.classList.add('active');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeModal() {
+            document.getElementById('surveyModal').classList.remove('active');
+            document.body.style.overflow = 'auto';
+        }
+
+        document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeModal(); });
+        document.getElementById('surveyModal').addEventListener('click', (e) => {
+            if (e.target === e.currentTarget) closeModal();
+        });
+
+        // ================================================================
+        // FILTERS
+        // ================================================================
+        document.querySelectorAll('.filter-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+                this.classList.add('active');
+                renderSurveys(this.dataset.filter);
+            });
+        });
+
+        // ================================================================
+        // INIT
+        // ================================================================
+        document.addEventListener('DOMContentLoaded', () => {
+            renderSurveys('all');
+        });
+    </script>
+
+</body>
+</html>

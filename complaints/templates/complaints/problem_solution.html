@@ -1,0 +1,836 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🌿 Eco-Saviour | Problems & Solutions</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .flip-card {
+            perspective: 1000px;
+            height: 340px;
+            cursor: pointer;
+        }
+        .flip-card-inner {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            transition: transform 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+            transform-style: preserve-3d;
+        }
+        .flip-card:hover .flip-card-inner {
+            transform: rotateY(180deg);
+        }
+        .flip-card-front, .flip-card-back {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            backface-visibility: hidden;
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: 0 8px 30px rgba(0,0,0,0.10);
+        }
+        .flip-card-front {
+            background: white;
+            border: 2px solid #e5e7eb;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            padding: 24px;
+        }
+        .flip-card-front .icon {
+            font-size: 56px;
+            margin-bottom: 12px;
+        }
+        .flip-card-front h3 {
+            font-size: 17px;
+            font-weight: 700;
+            color: #064e3b;
+        }
+        .flip-card-front .meta {
+            font-size: 11px;
+            color: #6b7280;
+            margin-top: 4px;
+        }
+        .flip-card-back {
+            background: linear-gradient(145deg, #064e3b, #047857);
+            transform: rotateY(180deg);
+            padding: 24px;
+            color: white;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            overflow-y: auto;
+        }
+        .flip-card-back .solution-icon {
+            font-size: 28px;
+            margin-bottom: 4px;
+        }
+        .flip-card-back h3 {
+            font-size: 16px;
+            font-weight: 700;
+        }
+        .flip-card-back .solution-desc {
+            font-size: 12.5px;
+            line-height: 1.6;
+            opacity: 0.92;
+            margin: 6px 0 10px;
+            flex: 1;
+        }
+        .badge {
+            display: inline-block;
+            padding: 2px 12px;
+            border-radius: 20px;
+            font-size: 9px;
+            font-weight: 700;
+            text-transform: uppercase;
+        }
+        .badge-urgent { background: #fee2e2; color: #991b1b; }
+        .badge-ongoing { background: #fef3c7; color: #92400e; }
+        .badge-solved { background: #d1fae5; color: #065f46; }
+        .badge-animal { background: #dbeafe; color: #1e40af; }
+        .badge-environment { background: #d1fae5; color: #065f46; }
+        .badge-pollution { background: #fed7aa; color: #9a3412; }
+        .badge-awareness { background: #e9d5ff; color: #6b21a8; }
+        .badge-climate { background: #fecaca; color: #991b1b; }
+        
+        .stat-card {
+            background: white;
+            padding: 16px;
+            border-radius: 12px;
+            text-align: center;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+            border: 1px solid #f0f0f0;
+        }
+        .stat-number {
+            font-size: 28px;
+            font-weight: 800;
+            color: #064e3b;
+        }
+        .filter-btn {
+            padding: 4px 14px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 600;
+            border: 2px solid #e5e7eb;
+            background: white;
+            color: #4b5563;
+            transition: all 0.3s;
+            cursor: pointer;
+        }
+        .filter-btn:hover { border-color: #064e3b; color: #064e3b; }
+        .filter-btn.active { background: #064e3b; border-color: #064e3b; color: white; }
+        
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.75);
+            backdrop-filter: blur(8px);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        .modal-overlay.active { display: flex; }
+        .modal-content {
+            background: white;
+            border-radius: 16px;
+            max-width: 520px;
+            width: 100%;
+            max-height: 80vh;
+            overflow-y: auto;
+            padding: 24px;
+            animation: slideIn 0.4s ease;
+        }
+        @keyframes slideIn {
+            from { transform: translateY(30px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+        .modal-close {
+            float: right;
+            font-size: 24px;
+            cursor: pointer;
+            background: none;
+            border: none;
+            color: #6b7280;
+        }
+        .modal-content .icon {
+            font-size: 48px;
+            text-align: center;
+            display: block;
+            margin-bottom: 8px;
+        }
+        @media (max-width: 768px) {
+            .flip-card { height: 300px; }
+            .flip-card-front .icon { font-size: 40px; }
+        }
+        @media (max-width: 480px) {
+            .flip-card { height: 280px; }
+            .flip-card-front { padding: 16px; }
+            .flip-card-front .icon { font-size: 32px; }
+            .flip-card-front h3 { font-size: 14px; }
+            .flip-card-back { padding: 16px; }
+            .flip-card-back .solution-desc { font-size: 11px; }
+        }
+        .modal-content::-webkit-scrollbar { width: 4px; }
+        .modal-content::-webkit-scrollbar-track { background: #f1f1f1; border-radius: 10px; }
+        .modal-content::-webkit-scrollbar-thumb { background: #064e3b; border-radius: 10px; }
+        .flip-card-back::-webkit-scrollbar { width: 3px; }
+        .flip-card-back::-webkit-scrollbar-track { background: rgba(255,255,255,0.1); border-radius: 10px; }
+        .flip-card-back::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.3); border-radius: 10px; }
+    </style>
+</head>
+<body>
+
+    <!-- Header -->
+    <header class="bg-emerald-900 text-white p-3 shadow-lg">
+        <div class="max-w-7xl mx-auto flex items-center justify-between flex-wrap gap-2">
+            <div class="flex items-center gap-2">
+                <span class="text-2xl">🌿</span>
+                <span class="font-bold">Eco-Saviour Amdavad</span>
+            </div>
+            <nav class="flex items-center gap-3 text-sm">
+                <a href="/animal-hospitals/" class="hover:text-emerald-200 transition">🏥 Clinics</a>
+                <a href="#" class="text-emerald-200 font-semibold">🌍 Problems</a>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Main -->
+    <main class="max-w-7xl mx-auto px-4 py-6">
+
+        <!-- Hero -->
+        <section class="text-center mb-8">
+            <h1 class="text-2xl md:text-3xl font-bold text-emerald-900">🌍 Environmental & Animal Challenges</h1>
+            <p class="text-gray-600 text-sm max-w-xl mx-auto">Issues affecting Ahmedabad's environment, wildlife, and community</p>
+            <div class="flex flex-wrap justify-center gap-1 mt-3" id="filterContainer">
+                <button class="filter-btn active" data-filter="all">All</button>
+                <button class="filter-btn" data-filter="urgent">🚨 Urgent</button>
+                <button class="filter-btn" data-filter="ongoing">🔄 Ongoing</button>
+                <button class="filter-btn" data-filter="solved">✅ Solved</button>
+                <button class="filter-btn" data-filter="animal">🐾 Animal</button>
+                <button class="filter-btn" data-filter="pollution">🌊 Pollution</button>
+                <button class="filter-btn" data-filter="environment">🌿 Environment</button>
+                <button class="filter-btn" data-filter="climate">☀️ Climate</button>
+                <button class="filter-btn" data-filter="awareness">🧠 Awareness</button>
+            </div>
+        </section>
+
+        <!-- Stats -->
+        <section class="grid grid-cols-2 md:grid-cols-4 gap-3 mb-8">
+            <div class="stat-card">
+                <div class="text-2xl">🌳</div>
+                <div class="stat-number">12,450+</div>
+                <div class="text-xs text-gray-500">Trees Planted</div>
+            </div>
+            <div class="stat-card">
+                <div class="text-2xl">🐕</div>
+                <div class="stat-number">2,380+</div>
+                <div class="text-xs text-gray-500">Animals Rescued</div>
+            </div>
+            <div class="stat-card">
+                <div class="text-2xl">♻️</div>
+                <div class="stat-number">1,200+</div>
+                <div class="text-xs text-gray-500">Cleanup Drives</div>
+            </div>
+            <div class="stat-card">
+                <div class="text-2xl">🧠</div>
+                <div class="stat-number">500+</div>
+                <div class="text-xs text-gray-500">Awareness Sessions</div>
+            </div>
+        </section>
+
+        <!-- Problems Grid -->
+        <section>
+            <div class="flex justify-between items-center mb-3">
+                <h2 class="text-lg font-bold text-emerald-900">📋 Problems & Solutions</h2>
+                <span id="resultCount" class="text-xs text-gray-500"></span>
+            </div>
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4" id="problemsGrid"></div>
+        </section>
+
+        <!-- CTA -->
+        <section class="mt-10 bg-gradient-to-r from-emerald-900 to-emerald-700 rounded-xl p-6 text-white text-center">
+            <h2 class="text-lg font-bold">🤝 Join the Movement</h2>
+            <p class="text-emerald-100 text-sm">Every small action counts. Join our community of eco-warriors.</p>
+            <div class="flex flex-wrap justify-center gap-2 mt-3">
+                <a href="#" class="bg-white text-emerald-900 px-6 py-2 rounded-full font-semibold text-sm hover:bg-emerald-50">Volunteer</a>
+                <a href="#" class="border border-white px-6 py-2 rounded-full font-semibold text-sm hover:bg-white hover:text-emerald-900">Donate</a>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-gray-900 text-gray-400 text-center py-3 mt-4 text-xs">
+        <p>© 2024 Eco-Saviour Amdavad | Together for a Greener Future 🌿</p>
+    </footer>
+
+    <!-- Modal -->
+    <div class="modal-overlay" id="solutionModal">
+        <div class="modal-content">
+            <button class="modal-close" onclick="closeModal()">✕</button>
+            <div id="modalContent"></div>
+        </div>
+    </div>
+
+    <script>
+        // ================================================================
+        // 📊 PROBLEMS DATA - NO IMAGES, ONLY EMOJI ICONS
+        // ================================================================
+
+        const problemsData = [
+            // ========================================
+            // ANIMAL WELFARE ISSUES (with contact details)
+            // ========================================
+            {
+                id: 1,
+                title: "Stray Animal Overpopulation",
+                category: "animal",
+                status: "ongoing",
+                icon: "🐕",
+                problem: "Ahmedabad has over 50,000 stray dogs and cats, leading to conflicts, disease spread, and suffering animals due to lack of food and shelter.",
+                solution: "Support ABC (Animal Birth Control) programs, report injured strays to animal ambulances (1962), adopt instead of buying pets, and support local animal shelters with food and supplies.",
+                organization: "Karuna Animal Ambulance",
+                contact: "1962",
+                showContact: true
+            },
+            {
+                id: 2,
+                title: "Illegal Wildlife Trade",
+                category: "animal",
+                status: "ongoing",
+                icon: "🐍",
+                problem: "Endangered species like pangolins, birds, and reptiles are illegally traded in Gujarat, destroying biodiversity and disrupting ecosystems.",
+                solution: "Report suspicious activities to wildlife authorities (07923254125), support conservation NGOs, spread awareness about protected species, and avoid buying exotic pets.",
+                organization: "Aranya Bhavan Wildlife Wing",
+                contact: "07923254125",
+                showContact: true
+            },
+            {
+                id: 3,
+                title: "Bird Habitat Destruction",
+                category: "animal",
+                status: "urgent",
+                icon: "🐦",
+                problem: "Wetlands and green spaces around Ahmedabad are being encroached, displacing migratory birds and destroying nesting sites.",
+                solution: "Protect existing wetlands, create artificial nesting sites, educate communities about bird conservation, and participate in bird counting drives.",
+                organization: "Samvedna Bird & Animal Trust",
+                contact: "+917069597373",
+                showContact: true
+            },
+            {
+                id: 4,
+                title: "Food Waste & Animal Health",
+                category: "animal",
+                status: "solved",
+                icon: "🍽️",
+                problem: "Poorly managed food waste attracts strays and rodents, leading to disease outbreaks and unhealthy animal populations.",
+                solution: "Compost organic waste, ensure proper segregation, partner with animal shelters for food redistribution programs, and educate communities about waste management.",
+                organization: "Bejuban Charitable Trust",
+                contact: "+917046219000",
+                showContact: true
+            },
+            {
+                id: 5,
+                title: "Animal Abuse & Neglect",
+                category: "animal",
+                status: "urgent",
+                icon: "😢",
+                problem: "Many stray and domestic animals in Ahmedabad face abuse, neglect, and abandonment. This causes immense suffering and creates unsafe conditions.",
+                solution: "Report animal abuse to authorities, support animal shelters, educate communities about animal welfare, and adopt instead of buying pets.",
+                organization: "Jivdaya Charitable Trust",
+                contact: "+919924418181",
+                showContact: true
+            },
+
+            // ========================================
+            // POLLUTION ISSUES (NO contact details)
+            // ========================================
+            {
+                id: 6,
+                title: "Plastic Waste in Water Bodies",
+                category: "pollution",
+                status: "urgent",
+                icon: "🛢️",
+                problem: "Thousands of tons of plastic waste are dumped into rivers and lakes around Ahmedabad, poisoning aquatic life and contaminating drinking water sources.",
+                solution: "Join weekly river cleanup drives, switch to reusable alternatives, support the 'Plastic-Free Ahmedabad' initiative, and practice proper waste segregation.",
+                organization: "Ahmedabad Municipal Corporation",
+                contact: null,
+                showContact: false
+            },
+            {
+                id: 7,
+                title: "Air Pollution Crisis",
+                category: "pollution",
+                status: "urgent",
+                icon: "💨",
+                problem: "Ahmedabad's AQI frequently exceeds 150, causing respiratory issues in humans and animals, and harming bird populations.",
+                solution: "Use public transport, plant more trees, support green energy initiatives, report industrial violations, and use masks during high pollution days.",
+                organization: "Gujarat Pollution Control Board",
+                contact: null,
+                showContact: false
+            },
+            {
+                id: 8,
+                title: "Land Pollution & Soil Degradation",
+                category: "pollution",
+                status: "ongoing",
+                icon: "🏜️",
+                problem: "Improper waste disposal, industrial chemicals, and overuse of pesticides are degrading soil quality in and around Ahmedabad, affecting agriculture and groundwater.",
+                solution: "Adopt organic farming practices, properly dispose of hazardous waste, support soil conservation programs, and reduce chemical usage in agriculture.",
+                organization: "Gujarat Agricultural University",
+                contact: null,
+                showContact: false
+            },
+            {
+                id: 9,
+                title: "E-Waste Management Crisis",
+                category: "pollution",
+                status: "urgent",
+                icon: "💻",
+                problem: "Ahmedabad generates thousands of tons of electronic waste annually, which is often dumped illegally, releasing toxic chemicals into soil and water.",
+                solution: "Use authorized e-waste recycling centers, donate old electronics to NGOs, support government e-waste initiatives, and reduce unnecessary electronic purchases.",
+                organization: "Gujarat Pollution Control Board",
+                contact: null,
+                showContact: false
+            },
+            {
+                id: 10,
+                title: "Industrial Chemical Spills",
+                category: "pollution",
+                status: "ongoing",
+                icon: "🧪",
+                problem: "Industrial zones around Ahmedabad have reported chemical spills that contaminate soil and water, affecting agricultural land and public health.",
+                solution: "Report industrial violations to pollution control board, support sustainable industries, create buffer zones near industrial areas, and advocate for stricter regulations.",
+                organization: "Gujarat Pollution Control Board",
+                contact: null,
+                showContact: false
+            },
+            {
+                id: 11,
+                title: "Noise Pollution Crisis",
+                category: "pollution",
+                status: "ongoing",
+                icon: "🔊",
+                problem: "Increasing traffic, construction, and industrial activities in Ahmedabad have raised noise levels beyond safe limits, causing stress and hearing damage in humans and animals.",
+                solution: "Plant noise-reducing trees along roads, use sound barriers in construction, enforce noise pollution laws, create silent zones near hospitals and schools.",
+                organization: "Ahmedabad Municipal Corporation",
+                contact: null,
+                showContact: false
+            },
+            {
+                id: 12,
+                title: "Light Pollution & Energy Waste",
+                category: "pollution",
+                status: "ongoing",
+                icon: "💡",
+                problem: "Excessive artificial lighting in Ahmedabad wastes energy, disrupts wildlife behavior, affects bird migration patterns, and harms human sleep cycles.",
+                solution: "Use energy-efficient lighting, install motion sensors, reduce unnecessary outdoor lighting, promote dark sky initiatives, and educate about light pollution.",
+                organization: "Ahmedabad Municipal Corporation",
+                contact: null,
+                showContact: false
+            },
+
+            // ========================================
+            // ENVIRONMENTAL ISSUES
+            // ========================================
+            {
+                id: 13,
+                title: "Urban Heat Island Effect",
+                category: "environment",
+                status: "urgent",
+                icon: "☀️",
+                problem: "Rapid urbanization has reduced green cover, making Ahmedabad 4-5°C hotter than surrounding rural areas. This extreme heat affects both humans and animals.",
+                solution: "Plant more trees, create rooftop gardens, use reflective materials on buildings, create urban cooling centers, and protect existing green spaces.",
+                organization: "Ahmedabad Municipal Corporation",
+                contact: null,
+                showContact: false
+            },
+            {
+                id: 14,
+                title: "Water Scarcity Crisis",
+                category: "environment",
+                status: "ongoing",
+                icon: "💧",
+                problem: "Groundwater levels in Ahmedabad are dropping by 3 meters annually due to over-extraction and poor rainwater harvesting.",
+                solution: "Install rainwater harvesting systems, use water-efficient appliances, support government initiatives for water conservation, and reuse water where possible.",
+                organization: "Ahmedabad Municipal Corporation",
+                contact: null,
+                showContact: false
+            },
+            {
+                id: 15,
+                title: "Declining Bee Population",
+                category: "environment",
+                status: "urgent",
+                icon: "🐝",
+                problem: "Pesticide use and habitat loss are causing a rapid decline in bee populations around Ahmedabad. This threatens food security as 70% of crops depend on pollination.",
+                solution: "Avoid using pesticides in gardens, plant bee-friendly flowers, support organic farming, create bee habitats in urban areas, and spread awareness.",
+                organization: "Gujarat Agricultural University",
+                contact: null,
+                showContact: false
+            },
+            {
+                id: 16,
+                title: "Open Defecation Near Water Sources",
+                category: "environment",
+                status: "ongoing",
+                icon: "🚽",
+                problem: "Open defecation near rivers and lakes contaminates water sources, spreading diseases to both humans and animals that rely on these water bodies.",
+                solution: "Build more public toilets, educate communities about sanitation, create awareness about water pollution, and support government sanitation programs.",
+                organization: "Ahmedabad Municipal Corporation",
+                contact: null,
+                showContact: false
+            },
+            {
+                id: 17,
+                title: "Deforestation & Green Cover Loss",
+                category: "environment",
+                status: "urgent",
+                icon: "🌲",
+                problem: "Rapid urbanization and illegal logging have reduced Ahmedabad's tree cover by 30% in the last decade, leading to habitat loss and increased pollution.",
+                solution: "Plant native trees, protect existing forests, create urban forests, implement strict tree cutting regulations, and encourage community tree-planting drives.",
+                organization: "Forest Department Gujarat",
+                contact: null,
+                showContact: false
+            },
+            {
+                id: 18,
+                title: "Soil Erosion & Land Degradation",
+                category: "environment",
+                status: "ongoing",
+                icon: "⛰️",
+                problem: "Deforestation, overgrazing, and poor agricultural practices have led to severe soil erosion in and around Ahmedabad, reducing agricultural productivity.",
+                solution: "Practice contour farming, plant cover crops, build terraces on slopes, implement agroforestry, and promote sustainable agricultural practices.",
+                organization: "Gujarat Agricultural University",
+                contact: null,
+                showContact: false
+            },
+            {
+                id: 19,
+                title: "Urban Sprawl & Habitat Fragmentation",
+                category: "environment",
+                status: "ongoing",
+                icon: "🏗️",
+                problem: "Uncontrolled urban expansion is fragmenting natural habitats, isolating wildlife populations, and reducing biodiversity in the Ahmedabad region.",
+                solution: "Plan sustainable urban growth, create wildlife corridors, protect green belts, implement smart city planning, and preserve natural areas.",
+                organization: "Urban Development Authority",
+                contact: null,
+                showContact: false
+            },
+            {
+                id: 20,
+                title: "Loss of Biodiversity",
+                category: "environment",
+                status: "urgent",
+                icon: "🦋",
+                problem: "Habitat destruction, pollution, and climate change have caused a 40% decline in local species diversity in Gujarat over the past 20 years.",
+                solution: "Create protected areas, restore degraded habitats, implement species conservation programs, reduce pollution, and promote biodiversity awareness.",
+                organization: "Gujarat Biodiversity Board",
+                contact: null,
+                showContact: false
+            },
+            {
+                id: 21,
+                title: "Wetland Destruction",
+                category: "environment",
+                status: "urgent",
+                icon: "🏞️",
+                problem: "Ahmedabad's wetlands are being filled and built upon at an alarming rate, destroying natural water filtration systems and wildlife habitats.",
+                solution: "Protect existing wetlands, restore degraded wetlands, create artificial wetlands, enforce wetland protection laws, and raise public awareness.",
+                organization: "Gujarat Environment Department",
+                contact: null,
+                showContact: false
+            },
+
+            // ========================================
+            // CLIMATE ISSUES
+            // ========================================
+            {
+                id: 22,
+                title: "Climate Change & Extreme Weather",
+                category: "climate",
+                status: "urgent",
+                icon: "🌍",
+                problem: "Rising global temperatures are causing more frequent and severe weather events in Gujarat, including droughts, floods, and cyclones affecting communities.",
+                solution: "Reduce carbon emissions, switch to renewable energy, adopt sustainable practices, prepare for climate change impacts, and build climate-resilient infrastructure.",
+                organization: "Climate Change Department Gujarat",
+                contact: null,
+                showContact: false
+            },
+            {
+                id: 23,
+                title: "Drought & Agricultural Crisis",
+                category: "climate",
+                status: "urgent",
+                icon: "🌾",
+                problem: "Recurring droughts in Gujarat are devastating crops, depleting groundwater, and affecting the livelihoods of thousands of farmers and their families.",
+                solution: "Implement water-saving irrigation techniques, promote drought-resistant crops, create water storage systems, provide farmer education, and government support.",
+                organization: "Agriculture Department Gujarat",
+                contact: null,
+                showContact: false
+            },
+            {
+                id: 24,
+                title: "Flooding & Urban Drainage Issues",
+                category: "climate",
+                status: "ongoing",
+                icon: "🌊",
+                problem: "Poor drainage systems and increased rainfall intensity due to climate change have led to frequent urban flooding in Ahmedabad, disrupting lives and damaging property.",
+                solution: "Improve drainage infrastructure, build retention ponds, implement flood warning systems, conduct flood risk mapping, and create emergency response plans.",
+                organization: "Ahmedabad Municipal Corporation",
+                contact: null,
+                showContact: false
+            },
+            {
+                id: 25,
+                title: "Forest Fires & Ecosystem Damage",
+                category: "climate",
+                status: "ongoing",
+                icon: "🔥",
+                problem: "Increasing temperatures and human activities have led to more frequent forest fires in Gujarat, destroying ecosystems and releasing massive carbon emissions.",
+                solution: "Implement fire prevention measures, create fire breaks, educate communities, develop early warning systems, and support firefighting resources.",
+                organization: "Forest Department Gujarat",
+                contact: null,
+                showContact: false
+            },
+            {
+                id: 26,
+                title: "Glacier Melt & Sea Level Rise",
+                category: "climate",
+                status: "ongoing",
+                icon: "🧊",
+                problem: "Glacier melting due to global warming is affecting water availability in Gujarat's rivers and threatening coastal communities with sea level rise.",
+                solution: "Reduce carbon emissions, build coastal protection, adapt to sea level rise, develop water conservation strategies, and promote climate action.",
+                organization: "Climate Change Department Gujarat",
+                contact: null,
+                showContact: false
+            },
+
+            // ========================================
+            // AWARENESS ISSUES (NO contact details)
+            // ========================================
+            {
+                id: 27,
+                title: "Lack of Human Awareness",
+                category: "awareness",
+                status: "urgent",
+                icon: "🧠",
+                problem: "Many residents of Ahmedabad are unaware of environmental issues, proper waste management, animal welfare, and their role in protecting the environment.",
+                solution: "Conduct community awareness programs, organize school workshops, use social media for education, create informative content, and lead by example.",
+                organization: "Eco-Saviour Initiative",
+                contact: null,
+                showContact: false
+            },
+            {
+                id: 28,
+                title: "E-Waste Awareness Gap",
+                category: "awareness",
+                status: "ongoing",
+                icon: "📱",
+                problem: "Most citizens don't know how to properly dispose of electronic waste, leading to illegal dumping and environmental contamination.",
+                solution: "Create awareness about e-waste recycling centers, organize e-waste collection drives, educate about the dangers of improper disposal, and support government initiatives.",
+                organization: "Gujarat Pollution Control Board",
+                contact: null,
+                showContact: false
+            },
+            {
+                id: 29,
+                title: "Environmental Education in Schools",
+                category: "awareness",
+                status: "ongoing",
+                icon: "📚",
+                problem: "Environmental education is not adequately integrated into school curricula, leading to a generation disconnected from nature and environmental issues.",
+                solution: "Advocate for environmental education in schools, organize nature camps, create educational materials, and involve students in environmental projects.",
+                organization: "Eco-Saviour Initiative",
+                contact: null,
+                showContact: false
+            },
+            {
+                id: 30,
+                title: "Plastic Bag Awareness",
+                category: "awareness",
+                status: "solved",
+                icon: "🛍️",
+                problem: "Despite bans, many people still use single-use plastic bags, unaware of their environmental impact on animals and ecosystems.",
+                solution: "Promote cloth bag usage, conduct awareness campaigns, support the plastic ban, encourage shops to use paper bags, and show the impact on wildlife.",
+                organization: "Ahmedabad Municipal Corporation",
+                contact: null,
+                showContact: false
+            }
+        ];
+
+        // ================================================================
+        // RENDER FUNCTION
+        // ================================================================
+        let currentFilter = 'all';
+
+        function renderProblems(filter = 'all') {
+            const grid = document.getElementById('problemsGrid');
+            const resultCount = document.getElementById('resultCount');
+            if (!grid) return;
+
+            let filtered = filter === 'all' ? problemsData : 
+                problemsData.filter(item => item.status === filter || item.category === filter);
+
+            resultCount.textContent = `Showing ${filtered.length} of ${problemsData.length}`;
+
+            if (filtered.length === 0) {
+                grid.innerHTML = `
+                    <div class="col-span-full text-center py-8">
+                        <div class="text-3xl mb-2">🔍</div>
+                        <p class="text-gray-500 text-sm">No problems found</p>
+                    </div>
+                `;
+                return;
+            }
+
+            grid.innerHTML = filtered.map((item) => {
+                const statusBadge = {
+                    'urgent': 'badge-urgent',
+                    'ongoing': 'badge-ongoing',
+                    'solved': 'badge-solved'
+                }[item.status] || 'badge-ongoing';
+
+                const categoryLabel = item.category.charAt(0).toUpperCase() + item.category.slice(1);
+                const contactBadge = item.showContact ? 
+                    '<span class="badge-animal" style="background:#dbeafe;color:#1e40af;padding:0 6px;border-radius:4px;font-size:8px;">📞 Contact</span>' : '';
+
+                return `
+                    <div class="flip-card" onclick="openModal(${problemsData.indexOf(item)})">
+                        <div class="flip-card-inner">
+                            <div class="flip-card-front">
+                                <div class="icon">${item.icon}</div>
+                                <h3>${item.title}</h3>
+                                <div class="meta">
+                                    ${categoryLabel} • <span class="badge ${statusBadge}">${item.status}</span>
+                                    ${contactBadge}
+                                </div>
+                            </div>
+                            <div class="flip-card-back">
+                                <div class="solution-icon">💡</div>
+                                <h3>Solution</h3>
+                                <div class="solution-desc">${item.solution.substring(0, 120)}${item.solution.length > 120 ? '...' : ''}</div>
+                                ${item.showContact ? `
+                                    <div style="background:rgba(255,255,255,0.1);padding:6px 10px;border-radius:6px;margin-bottom:6px;">
+                                        <div style="font-size:10px;opacity:0.8;">🏢 ${item.organization}</div>
+                                        ${item.contact ? `<div style="font-size:10px;opacity:0.8;">📞 ${item.contact}</div>` : ''}
+                                    </div>
+                                ` : `
+                                    <div style="font-size:10px;opacity:0.6;margin-bottom:6px;">
+                                        🏢 ${item.organization}
+                                    </div>
+                                `}
+                                <button class="mt-1 bg-white/20 px-4 py-1.5 rounded-full text-xs font-semibold hover:bg-white hover:text-emerald-900 transition self-start">
+                                    Learn More →
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // ================================================================
+        // MODAL
+        // ================================================================
+        function openModal(index) {
+            const item = problemsData[index];
+            if (!item) return;
+
+            const modal = document.getElementById('solutionModal');
+            const content = document.getElementById('modalContent');
+
+            const statusBadge = {
+                'urgent': 'badge-urgent',
+                'ongoing': 'badge-ongoing',
+                'solved': 'badge-solved'
+            }[item.status] || 'badge-ongoing';
+
+            const contactSection = item.showContact ? `
+                <div class="bg-blue-50 p-3 rounded-lg text-sm mb-3 border-l-4 border-blue-500">
+                    <h4 class="font-semibold text-blue-700 text-sm">📋 Contact Information</h4>
+                    <p class="text-gray-700 text-sm mt-1">🏢 <strong>${item.organization}</strong></p>
+                    ${item.contact ? `<p class="text-gray-700 text-sm">📞 <a href="tel:${item.contact}" class="text-blue-600 font-semibold">${item.contact}</a></p>` : ''}
+                    <p class="text-xs text-gray-500 mt-1">This organization handles animal-related issues</p>
+                </div>
+            ` : `
+                <div class="bg-gray-50 p-3 rounded-lg text-sm mb-3 border-l-4 border-gray-400">
+                    <h4 class="font-semibold text-gray-600 text-sm">📋 Responsible Authority</h4>
+                    <p class="text-gray-700 text-sm">🏢 ${item.organization}</p>
+                    <p class="text-xs text-gray-400 mt-1">For environmental issues, contact local authorities</p>
+                </div>
+            `;
+
+            content.innerHTML = `
+                <button class="modal-close" onclick="closeModal()">✕</button>
+                <span class="icon">${item.icon}</span>
+                <div class="flex items-center gap-3 mb-2 flex-wrap justify-center">
+                    <h2 class="text-xl font-bold text-emerald-900">${item.title}</h2>
+                    <span class="badge ${statusBadge}">${item.status}</span>
+                    <span class="text-xs text-gray-500">${item.category}</span>
+                </div>
+                
+                <div class="bg-red-50 p-3 rounded-lg mb-3 border-l-4 border-red-500">
+                    <h4 class="font-semibold text-red-600 text-sm">⚠️ The Problem</h4>
+                    <p class="text-sm text-gray-700">${item.problem}</p>
+                </div>
+                
+                <div class="bg-emerald-50 p-3 rounded-lg mb-3 border-l-4 border-emerald-500">
+                    <h4 class="font-semibold text-emerald-600 text-sm">💡 The Solution</h4>
+                    <p class="text-sm text-gray-700">${item.solution}</p>
+                </div>
+                
+                ${contactSection}
+                
+                <div class="flex gap-2">
+                    <button onclick="closeModal()" class="flex-1 bg-emerald-600 text-white py-2.5 rounded-lg text-sm font-semibold hover:bg-emerald-700 transition">
+                        🤝 Get Involved
+                    </button>
+                    ${item.showContact && item.contact ? `
+                        <a href="tel:${item.contact}" class="flex-1 bg-blue-600 text-white py-2.5 rounded-lg text-sm font-semibold hover:bg-blue-700 transition text-center">
+                            📞 Call Now
+                        </a>
+                    ` : ''}
+                </div>
+            `;
+
+            modal.classList.add('active');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeModal() {
+            document.getElementById('solutionModal').classList.remove('active');
+            document.body.style.overflow = 'auto';
+        }
+
+        document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeModal(); });
+        document.getElementById('solutionModal').addEventListener('click', (e) => {
+            if (e.target === e.currentTarget) closeModal();
+        });
+
+        // ================================================================
+        // FILTERS
+        // ================================================================
+        document.querySelectorAll('.filter-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+                this.classList.add('active');
+                renderProblems(this.dataset.filter);
+            });
+        });
+
+        // ================================================================
+        // INIT
+        // ================================================================
+        document.addEventListener('DOMContentLoaded', () => {
+            renderProblems('all');
+        });
+    </script>
+
+</body>
+</html>

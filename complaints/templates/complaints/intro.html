@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Welcome to Eco-Saviour Amdavad</title>
+    <!-- Tailwind Play CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Typed.js CDN for the automated writing/erasing effect -->
+    <script src="https://unpkg.com/typed.js@2.1.0/dist/typed.umd.js"></script>
+    
+    <style>
+        .image-overlay {
+            background-color: rgba(6, 78, 59, 0.78);
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(24px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .animate-fade-in-up {
+            animation: fadeInUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+
+        .delay-100 { animation-delay: 0.15s; }
+        .delay-200 { animation-delay: 0.3s; }
+
+        /* Custom style to color the typing cursor */
+        .typed-cursor {
+            color: #10b981;
+            font-weight: 300;
+        }
+    </style>
+</head>
+<body class="bg-[url('https://images.unsplash.com/photo-1542601906990-b4d3fb778b09?auto=format&fit=crop&q=80&w=1600')] bg-cover bg-center bg-no-repeat min-h-screen text-white font-sans overflow-x-hidden">
+<!-- Background Gradient Ambient Blobs -->
+<div class="absolute top-1/4 left-1/4 w-72 h-72 bg-emerald-500/20 rounded-full blur-3xl pointer-events-none animate-pulse"></div>
+<div class="absolute bottom-1/4 right-1/4 w-80 h-80 bg-teal-500/25 rounded-full blur-3xl pointer-events-none animate-pulse delay-1000"></div>
+    <div class="image-overlay min-h-screen flex flex-col justify-between">
+
+        <!-- Header Section -->
+        <header class="bg-white/10 backdrop-blur-md border-b border-white/20 py-12 text-center shadow-lg transform opacity-0 animate-fade-in-up">
+            <div class="max-w-4xl mx-auto px-4">
+                <h1 class="text-4xl md:text-5xl font-extrabold tracking-tight mb-3 drop-shadow-md">🌱 Eco-Saviour Amdavad</h1>
+                
+                <!-- Typing Animation Target Area -->
+                <p class="text-lg md:text-xl text-emerald-100/90 font-medium h-8">
+                    Empowering Citizens. Protecting Our <span id="typed-text" class="text-emerald-400 font-bold border-b-2 border-transparent"></span>
+                </p>
+                
+                <!-- Animated pulsing badge -->
+                <span class="inline-flex items-center gap-1.5 bg-emerald-500 text-xs font-bold uppercase tracking-wider px-3 py-1.5 mt-6 rounded-full shadow-sm relative">
+                    <span class="flex h-2 w-2 relative">
+                        <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-white opacity-75"></span>
+                        <span class="relative inline-flex rounded-full h-2 w-2 bg-white"></span>
+                    </span>
+                    Ahmedabad Civic Action Grid
+                </span>
+            </div>
+        </header>
+<!-- Interactive Statistics Grid Section -->
+<section class="max-w-5xl mx-auto px-4 mt-8 w-full text-center">
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <!-- Stat 1 -->
+        <div class="bg-white/5 backdrop-blur-md border border-white/10 rounded-xl p-4 transition-transform hover:scale-105">
+            <div class="text-2xl font-black text-emerald-400">1,240+</div>
+            <div class="text-xs uppercase tracking-wider text-emerald-100/60 mt-1">Resolved Alerts</div>
+        </div>
+        <!-- Stat 2 -->
+        <div class="bg-white/5 backdrop-blur-md border border-white/10 rounded-xl p-4 transition-transform hover:scale-105">
+            <div class="text-2xl font-black text-teal-400">45 Mins</div>
+            <div class="text-xs uppercase tracking-wider text-emerald-100/60 mt-1">Avg Response Time</div>
+        </div>
+        <!-- Stat 3 -->
+        <div class="bg-white/5 backdrop-blur-md border border-white/10 rounded-xl p-4 transition-transform hover:scale-105">
+            <div class="text-2xl font-black text-emerald-400">320+</div>
+            <div class="text-xs uppercase tracking-wider text-emerald-100/60 mt-1">Animals Rescued</div>
+        </div>
+        <!-- Stat 4 -->
+        <div class="bg-white/5 backdrop-blur-md border border-white/10 rounded-xl p-4 transition-transform hover:scale-105">
+            <div class="text-2xl font-black text-teal-400">7 Wards</div>
+            <div class="text-xs uppercase tracking-wider text-emerald-100/60 mt-1">Active Coverage</div>
+        </div>
+    </div>
+</section>
+        <!-- Main Dashboard Navigation Grid -->
+        <main class="max-w-5xl mx-auto px-4 my-16 w-full">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8 justify-center">
+                
+                <!-- Card 1: Report Grievance -->
+                <div class="opacity-0 animate-fade-in-up delay-100 bg-white/10 backdrop-blur-md border border-white/20 rounded-2xl p-8 text-center shadow-xl flex flex-col justify-between transition-all duration-300 ease-out hover:-translate-y-3 hover:bg-white/20 hover:border-emerald-400 hover:shadow-2xl group">
+                    <div>
+                        <div class="text-5xl mb-4 transform transition-transform duration-300 group-hover:scale-125">📝</div>
+                        <h3 class="text-2xl font-bold mb-3 text-white group-hover:text-emerald-300 transition-colors">Report an Issue</h3>
+                        <p class="text-emerald-100/80 text-sm leading-relaxed">
+                            File an official civic grievance regarding solid waste mismanagement, open illegal dumping, drainage spills, or report an animal requiring rescue intervention.
+                        </p>
+                    </div>
+                    <div class="mt-8">
+                        <a href="{% url 'home' %}" class="block w-full bg-emerald-500 hover:bg-emerald-600 active:scale-95 text-black font-bold text-sm uppercase tracking-wide py-3.5 px-4 rounded-xl shadow-md transition-all duration-200">
+                            Raise a Complaint &rarr;
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Card 2: Open Helplines Directory -->
+                <div class="opacity-0 animate-fade-in-up delay-200 bg-white/10 backdrop-blur-md border border-white/20 rounded-2xl p-8 text-center shadow-xl flex flex-col justify-between transition-all duration-300 ease-out hover:-translate-y-3 hover:bg-white/20 hover:border-teal-400 hover:shadow-2xl group">
+                    <div>
+                        <div class="text-5xl mb-4 transform transition-transform duration-300 group-hover:scale-125">📞</div>
+                        <h3 class="text-2xl font-bold mb-3 text-white group-hover:text-teal-300 transition-colors">Emergency Directories</h3>
+                        <p class="text-emerald-100/80 text-sm leading-relaxed">
+                            Instantly access verified direct hotlines for the AMC CNCD cattle control, municipal corporation response units, and local non-profit stray animal ambulances.
+                        </p>
+                    </div>
+                    <div class="mt-8">
+                        <a href="{% url 'helpline' %}" class="block w-full bg-teal-500 hover:bg-teal-600 active:scale-95 text-black font-bold text-sm uppercase tracking-wide py-3.5 px-4 rounded-xl shadow-md transition-all duration-200">
+                            View Helplines &rarr;
+                        </a>
+                    </div>
+                </div>
+                    
+
+        
+                <div class="opacity-0 animate-fade-in-up delay-200 bg-white/10 backdrop-blur-md border border-white/20 rounded-2xl p-8 text-center shadow-xl flex flex-col justify-between transition-all duration-300 ease-out hover:-translate-y-3 hover:bg-white/20 hover:border-teal-400 hover:shadow-2xl group">
+                    <div>
+                        <div class="text-5xl mb-4 transform transition-transform duration-300 group-hover:scale-125">🗑</div>
+                        <h3 class="text-2xl font-bold mb-3 text-white group-hover:text-teal-300 transition-colors">Disposal guide</h3>
+                        <p class="text-emerald-100/80 text-sm leading-relaxed">
+                            Proper Disposal guide for multiple types of waste
+                        </p>
+                    </div>
+                    <div class="mt-8">
+                        <a href="{% url 'disposal_guide' %}" class="block w-full bg-teal-500 hover:bg-teal-600 active:scale-95 text-black font-bold text-sm uppercase tracking-wide py-3.5 px-4 rounded-xl shadow-md transition-all duration-200">
+                            Disposal Guide &rarr;
+                        </a>
+                    </div>
+                </div>
+
+                <div class="opacity-0 animate-fade-in-up delay-100 bg-white/10 backdrop-blur-md border border-white/20 rounded-2xl p-8 text-center shadow-xl flex flex-col justify-between transition-all duration-300 ease-out hover:-translate-y-3 hover:bg-white/20 hover:border-emerald-400 hover:shadow-2xl group">
+                    <div>
+                        <div class="text-5xl mb-4 transform transition-transform duration-300 group-hover:scale-125">🐾</div>
+                        <h3 class="text-2xl font-bold mb-3 text-white group-hover:text-emerald-300 transition-colors">Nearest clinic to you</h3>
+                        <p class="text-emerald-100/80 text-sm leading-relaxed">
+                            search nearest clinic/hospital for your pet or stray animal incase of serious injury
+                        </p>
+                    </div>
+                    <div class="mt-8">
+                        <a href="{% url 'animal_hospitals' %}" class="block w-full bg-emerald-500 hover:bg-emerald-600 active:scale-95 text-black font-bold text-sm uppercase tracking-wide py-3.5 px-4 rounded-xl shadow-md transition-all duration-200">
+                            search &rarr;
+                        </a>
+                    </div>
+                </div>
+
+
+            <div class="opacity-0 animate-fade-in-up delay-100 bg-white/10 backdrop-blur-md border border-white/20 rounded-2xl p-8 text-center shadow-xl flex flex-col justify-between transition-all duration-300 ease-out hover:-translate-y-3 hover:bg-white/20 hover:border-emerald-400 hover:shadow-2xl group">
+                    <div>
+                        <div class="text-5xl mb-4 transform transition-transform duration-300 group-hover:scale-125">📝</div>
+                        <h3 class="text-2xl font-bold mb-3 text-white group-hover:text-emerald-300 transition-colors">Problem & solutions</h3>
+                        <p class="text-emerald-100/80 text-sm leading-relaxed">
+                            we have provided solutions for improper waste disposal in environment and effects on animals 
+                        </p>
+                    </div>
+                    <div class="mt-8">
+                        <a href="{% url 'problem_solution' %}" class="block w-full bg-emerald-500 hover:bg-emerald-600 active:scale-95 text-black font-bold text-sm uppercase tracking-wide py-3.5 px-4 rounded-xl shadow-md transition-all duration-200">
+                            checkout &rarr;
+                        </a>
+                    </div>
+                </div>
+
+        <div class="opacity-0 animate-fade-in-up delay-100 bg-white/10 backdrop-blur-md border border-white/20 rounded-2xl p-8 text-center shadow-xl flex flex-col justify-between transition-all duration-300 ease-out hover:-translate-y-3 hover:bg-white/20 hover:border-emerald-400 hover:shadow-2xl group">
+                    <div>
+                        <div class="text-5xl mb-4 transform transition-transform duration-300 group-hover:scale-125">📝</div>
+                        <h3 class="text-2xl font-bold mb-3 text-white group-hover:text-emerald-300 transition-colors">Our Surveys</h3>
+                        <p class="text-emerald-100/80 text-sm leading-relaxed">
+                            we have sueveyed multiple places to check environment and animal related issues 
+                        </p>
+                    </div>
+                    <div class="mt-8">
+                        <a href="{% url 'surveys' %}" class="block w-full bg-emerald-500 hover:bg-emerald-600 active:scale-95 text-black font-bold text-sm uppercase tracking-wide py-3.5 px-4 rounded-xl shadow-md transition-all duration-200">
+                            checkout &rarr;
+                        </a>
+                    </div>
+                </div>
+
+            </div>
+        </main>
+
+        <!-- Footer -->
+        <footer class="text-center text-emerald-200/50 text-xs py-8 bg-black/10 backdrop-blur-sm">
+            <p>&copy; 2026 Eco-Saviour Amdavad | Modern Animated Tailwind Stack</p>
+        </footer>
+
+    </div>
+
+    <!-- Script Configuration for the Automatic Writing & Erasing Effect -->
+    <script>
+        var typed = new Typed('#typed-text', {
+            strings: ['Environment.', 'Stray Animals.', 'Local Wildlife.', 'Amdavad City.'],
+            typeSpeed: 60,       // Speed of typing words (in milliseconds)
+            backSpeed: 40,       // Speed of erasing words (in milliseconds)
+            backDelay: 1500,     // Time the word stays on screen before erasing (1.5 seconds)
+            loop: true           // Keep repeating the process indefinitely
+        });
+    </script>
+
+</body>
+</html>

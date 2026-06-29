@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Complaint Submitted Successfully</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-slate-50 min-h-screen flex items-center justify-center font-sans px-4">
+
+    <div class="max-w-md w-full bg-white border border-slate-200 rounded-2xl p-8 text-center shadow-xl transform transition-all duration-500 scale-100 hover:scale-[1.01]">
+        
+        <div class="w-16 h-16 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center text-3xl mx-auto mb-6 shadow-inner animate-bounce">
+            ✓
+        </div>
+
+        <h2 class="text-2xl font-extrabold text-slate-900 mb-2">Submission Successful!</h2>
+        <p class="text-slate-500 text-sm leading-relaxed mb-8">
+            Your environmental grievance has been logged into the Ahmedabad Civic Action Grid. Our rescue and monitoring units have been alerted.
+        </p>
+
+        <div class="space-y-3">
+            <a href="{% url 'download_pdf' complaint_id %}" class="block w-full bg-emerald-600 hover:bg-emerald-700 active:scale-95 text-white font-bold text-sm uppercase tracking-wider py-3.5 px-4 rounded-xl shadow-md transition-all duration-150">
+                📥 Download PDF Receipt
+            </a>
+
+            <a href="{% url 'home' %}" class="block w-full bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-sm uppercase tracking-wider py-3.5 px-4 rounded-xl transition-colors">
+                Return to Form &larr;
+            </a>
+        </div>
+        
+    </div>
+
+</body>
+</html>

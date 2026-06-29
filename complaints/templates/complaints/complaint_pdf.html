@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Grievance Acknowledgment Receipt</title>
+    <style>
+        @page {
+            size: A4;
+            margin: 2cm;
+        }
+        body {
+            font-family: Arial, sans-serif;
+            color: #334155;
+            line-height: 1.5;
+        }
+        .header {
+            text-align: center;
+            border-bottom: 2px solid #059669;
+            padding-bottom: 15px;
+            margin-bottom: 30px;
+        }
+        .title {
+            color: #064e3b;
+            font-size: 24px;
+            font-weight: bold;
+            margin: 0;
+        }
+        .subtitle {
+            color: #64748b;
+            font-size: 12px;
+            margin-top: 5px;
+        }
+        .section-title {
+            font-size: 14px;
+            text-transform: uppercase;
+            color: #059669;
+            font-weight: bold;
+            margin-bottom: 10px;
+            border-bottom: 1px solid #e2e8f0;
+            padding-bottom: 4px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 25px;
+        }
+        th, td {
+            padding: 10px;
+            text-align: left;
+            vertical-align: top;
+            font-size: 13px;
+        }
+        th {
+            width: 30%;
+            font-weight: bold;
+            color: #1e293b;
+            background-color: #f8fafc;
+        }
+        td {
+            color: #475569;
+            border-bottom: 1px solid #f1f5f9;
+        }
+        .image-container {
+            margin-top: 15px;
+            text-align: center;
+        }
+        .uploaded-img {
+            max-width: 400px;
+            max-height: 250px;
+            border-radius: 8px;
+            border: 1px solid #cbd5e1;
+        }
+        .footer {
+            position: fixed;
+            bottom: 0;
+            width: 100%;
+            text-align: center;
+            font-size: 10px;
+            color: #94a3b8;
+            border-top: 1px solid #e2e8f0;
+            padding-top: 10px;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- PDF Header -->
+    <div class="header">
+        <div class="title">🌱 Eco-Saviour Amdavad</div>
+        <div class="subtitle">Official Civic Grievance & Wildlife Rescue Acknowledgment</div>
+    </div>
+
+    <!-- Meta Information Grid -->
+    <div class="section-title">Grievance Metadata</div>
+    <table>
+        <tr>
+            <th>Receipt Generated On</th>
+            <td>2026-06-23</td>
+        </tr>
+        <tr>
+            <th>Filing Channel</th>
+            <td>Digital Citizen Portal Grid</td>
+        </tr>
+    </table>
+
+    <!-- Complaint Specific Details -->
+    <div class="section-title">Submitted Citizen Details</div>
+    <table>
+        <tr>
+            <th>Full Name</th>
+            <td>{{ complaint.name }}</td>
+        </tr>
+        <tr>
+            <th>Contact Email</th>
+            <td>{{ complaint.email }}</td>
+        </tr>
+        <tr>
+            <th>Primary Landmark / Area</th>
+            <td>{{ complaint.location }}</td>
+        </tr>
+        <tr>
+            <th>Detailed Description</th>
+            <td>{{ complaint.description }}</td>
+        </tr>
+    </table>
+
+    <!-- Conditional Image Attachment Section -->
+    {% if complaint.image %}
+    <div class="section-title">Evidence Attachments Field</div>
+    <div class="image-container">
+        <!-- xhtml2pdf requires the absolute physical path on your computer disk to display images correctly -->
+        <img class="uploaded-img" src="{{ complaint.image.path }}" alt="Grievance Evidence Proof">
+    </div>
+    {% endif %}
+
+    <!-- PDF Sticky Bottom Footer -->
+    <div class="footer">
+        This is an automatically generated system electronic receipt. Validated tracking log for Eco-Saviour Amdavad.
+    </div>
+
+</body>
+</html>

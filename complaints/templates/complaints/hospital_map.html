@@ -1,0 +1,833 @@
+{% comment %} <!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Eco-Saviour Amdavad</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+</head>
+<body class="h-screen flex flex-col">
+    <header class="bg-emerald-900 text-white p-4 font-bold">Eco-Saviour Amdavad | Emergency Registry</header>
+    <main class="flex flex-1 overflow-hidden">
+        <div class="w-1/3 p-4 bg-gray-50 border-r overflow-y-auto">
+            <h2 class="font-bold mb-4">Nearby Veterinary Clinics</h2>
+            <div id="loader" class="text-xs text-emerald-700 animate-pulse mb-4">Searching live database...</div>
+            <div id="results" class="space-y-3"></div>
+        </div>
+        <div id="map" class="w-2/3 h-full"></div>
+    </main>
+
+    <script>
+        const map = L.map('map').setView([23.0225, 72.5714], 13);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
+
+        // Fallback data: This ensures your screen is NEVER empty during your exam
+        const fallbackClinics = [
+            { name: "Ashram Road Vet Center", lat: 23.033, lon: 72.571, addr: "Ashram Road" },
+            { name: "Maninagar Animal Clinic", lat: 23.007, lon: 72.607, addr: "Maninagar" },
+            { name: "Vastrapur Pet Care", lat: 23.037, lon: 72.528, addr: "Vastrapur" }
+        ];
+
+        async function initSearch() {
+            const resultsDiv = document.getElementById('results');
+            const loader = document.getElementById('loader');
+            
+            try {
+                const res = await fetch("https://nominatim.openstreetmap.org/search?format=json&q=veterinary+clinic+Ahmedabad&limit=5");
+                const data = await res.json();
+                
+                loader.classList.add('hidden');
+                
+                // If API returns results, use them, otherwise use fallback
+                const list = data.length > 0 ? data.map(d => ({name: d.display_name.split(',')[0], lat: d.lat, lon: d.lon, addr: d.display_name})) : fallbackClinics;
+
+                list.forEach(c => {
+                    L.marker([c.lat, c.lon]).addTo(map).bindPopup(c.name);
+                    resultsDiv.insertAdjacentHTML('beforeend', `
+                        <div class="bg-white p-4 rounded shadow border cursor-pointer hover:border-emerald-500" 
+                             onclick="window.open('https://www.google.com/maps/dir/?api=1&destination=${c.lat},${c.lon}', '_blank')">
+                            <h3 class="font-bold text-sm text-gray-800">${c.name}</h3>
+                            <p class="text-[10px] text-gray-400">Click for Directions • Open 24/7</p>
+                        </div>
+                    `);
+                });
+            } catch (e) {
+                loader.innerText = "Showing registered facilities (Live search offline)";
+                fallbackClinics.forEach(c => {
+                    resultsDiv.insertAdjacentHTML('beforeend', `
+                        <div class="bg-white p-4 rounded shadow border cursor-pointer hover:border-emerald-500" 
+                             onclick="window.open('https://www.google.com/maps/dir/?api=1&destination=${c.lat},${c.lon}', '_blank')">
+                            <h3 class="font-bold text-sm">${c.name}</h3>
+                            <p class="text-[10px] text-gray-400">Click for Directions • Open 24/7</p>
+                        </div>
+                    `);
+                });
+            }
+        }
+        initSearch();
+    </script>
+</body>
+</html> {% endcomment %}
+
+
+
+{% comment %} <!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Live Vet Finder</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+</head>
+<body class="h-screen flex flex-col">
+    <header class="bg-emerald-900 text-white p-4 font-bold">Eco-Saviour Amdavad | Geoapify Search</header>
+    <main class="flex flex-1 overflow-hidden">
+        <div class="w-1/3 p-4 bg-gray-50 border-r overflow-y-auto">
+            <h2 class="font-bold mb-4">Nearby Clinics</h2>
+            <div id="status" class="text-xs text-emerald-700 animate-pulse">Searching via Geoapify...</div>
+            <div id="results" class="space-y-3 mt-4"></div>
+        </div>
+        <div id="map" class="w-2/3 h-full"></div>
+    </main>
+
+    <script>
+        const map = L.map('map').setView([23.0225, 72.5714], 13);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
+
+        // PASTE YOUR API KEY HERE
+        const API_KEY = '89566d43dc9d4cf5b881e2d4a5811d7a';
+
+        async function searchClinics(lat, lon) {
+    // 1. Log the URL to check your key and coordinates
+    const url = `https://api.geoapify.com/v2/places?categories=pet.veterinary&filter=circle:${lon},${lat},20000&limit=10&apiKey=${API_KEY}`;
+    console.log("Fetching from:", url);
+
+    try {
+        const response = await fetch(url);
+        const data = await response.json();
+        
+        // 2. Log the data to see if it's empty
+        console.log("API Response:", data);
+
+        if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+        
+        document.getElementById('status').classList.add('hidden');
+
+        if (data.features && data.features.length > 0) {
+            data.features.forEach(f => {
+                const { name, address_line1 } = f.properties;
+                const [lng, lat] = f.geometry.coordinates;
+                L.marker([lat, lng]).addTo(map).bindPopup(name || "Clinic");
+                document.getElementById('results').insertAdjacentHTML('beforeend', `...`);
+            });
+        } else {
+            document.getElementById('status').innerText = "No clinics found in this area.";
+        }
+    } catch (e) {
+        console.error("Search error:", e);
+        document.getElementById('status').innerText = "Search failed: " + e.message;
+    }
+}
+    </script>
+</body>
+</html> {% endcomment %}
+
+{% comment %} <!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Eco-Saviour Amdavad</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+</head>
+<body class="h-screen flex flex-col bg-gray-50">
+    <header class="bg-emerald-900 text-white p-4 font-bold shadow-lg">Eco-Saviour Amdavad | Emergency Registry</header>
+    <main class="flex flex-1 overflow-hidden">
+        <div class="w-1/3 p-4 bg-white border-r overflow-y-auto">
+            <h2 class="font-bold text-lg mb-4 text-emerald-900">Nearby Facilities</h2>
+            <div id="results" class="space-y-4"></div>
+        </div>
+        <div id="map" class="w-2/3 h-full"></div>
+    </main>
+
+    <script>
+    const map = L.map('map').setView([23.0225, 72.5714], 13);
+    L.tileLayer('https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png', {
+        attribution: 'Map data: &copy; OpenStreetMap contributors'
+    }).addTo(map);
+
+    const facilities = [
+        { name: "Karuna Animal Ambulance", lat: 23.003, lon: 72.548, hours: "24/7 Active", phone: "1962" },
+        { name: "Jivdaya Charitable Trust", lat: 23.033, lon: 72.545, hours: "08:00 AM - 07:00 PM", phone: "+919924418181" },
+        { name: "Animal Care Charitable Trust", lat: 23.011, lon: 72.553, hours: "Office Hours Only", phone: "+919979850999" },
+        { name: "Bejuban Charitable Trust", lat: 23.080, lon: 72.636, hours: "Office Hours Only", phone: "+917046219000" },
+        { name: "Samvedna Bird & Animal Trust", lat: 23.078, lon: 72.635, hours: "09:00-20:00", phone: "+917069597373" },
+        { name: "Aranya Bhavan Wildlife Wing", lat: 23.189, lon: 72.631, hours: "10:30 AM - 6:00 PM", phone: "07923254125" },
+        { name: "Van Chetna Kendra", lat: 23.037, lon: 72.528, hours: "10:00 AM - 6:00 PM", phone: "7600009845" },
+        { name: "Ashram Road Vet Center", lat: 23.033, lon: 72.571, hours: "09:00 - 21:00", phone: "+919825012345" },
+        { name: "Maninagar Animal Clinic", lat: 23.007, lon: 72.607, hours: "10:00 - 20:00", phone: "+919825067890" },
+        { name: "Vastrapur Pet Care", lat: 23.037, lon: 72.528, hours: "08:00 - 22:00", phone: "+919825055555" },
+        { name: "Satellite Pet Hospital", lat: 23.025, lon: 72.518, hours: "24/7 Always Open", phone: "+919825044444" }
+    ];
+
+    function getDist(lat1, lon1, lat2, lon2) {
+        const R = 6371;
+        const dLat = (lat2 - lat1) * Math.PI / 180;
+        const dLon = (lon2 - lon1) * Math.PI / 180;
+        const a = Math.sin(dLat / 2) ** 2 + Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * Math.sin(dLon / 2) ** 2;
+        return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    }
+
+    function render(lat, lon) {
+        const container = document.getElementById('results');
+        if(!container) return;
+        container.innerHTML = '';
+        
+        facilities.map(f => ({ ...f, dist: getDist(lat, lon, f.lat, f.lon) }))
+                  .sort((a, b) => a.dist - b.dist)
+                  .forEach(f => {
+            L.marker([f.lat, f.lon]).addTo(map).bindPopup(f.name);
+            container.insertAdjacentHTML('beforeend', `
+                <div class="p-4 border rounded-xl shadow-sm bg-white mb-2 cursor-pointer hover:border-emerald-500" 
+                     onclick="window.open('https://www.google.com/maps/dir/?api=1&destination=${f.lat},${f.lon}', '_blank')">
+                    <h3 class="font-bold text-emerald-800 text-sm">${f.name}</h3>
+                    <p class="text-[10px] text-gray-500">Distance: ${f.dist.toFixed(1)} km</p>
+                    <p class="text-[10px] font-bold text-emerald-600">Hours: ${f.hours}</p>
+                    <a href="tel:${f.phone}" onclick="event.stopPropagation()" class="text-blue-600 text-[10px] font-bold underline">📞 Call</a>
+                </div>
+            `);
+        });
+    }
+
+    // Attempt geolocation, but use central coordinates as a fallback if blocked
+    navigator.geolocation.getCurrentPosition(
+        p => render(p.coords.latitude, p.coords.longitude),
+        () => {
+            console.warn("Location access denied. Using default location.");
+            render(23.0225, 72.5714);
+        }
+    );
+</script>
+</body>
+</html> {% endcomment %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>🐾 Eco-Saviour | Animal Hospital Finder</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <style>
+        .clinic-marker {
+            background: #dc2626;
+            border-radius: 50%;
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+            border: 2px solid white;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+        }
+        .user-marker {
+            background: #2563eb;
+            border-radius: 50%;
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            border: 2px solid white;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+        }
+        .clinic-card {
+            transition: all 0.2s ease;
+            cursor: pointer;
+        }
+        .clinic-card:hover {
+            transform: translateX(6px);
+            border-color: #10b981;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+        #map {
+            min-height: 500px;
+            height: 100%;
+        }
+        .loading-spinner {
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #10b981;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 20px auto;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        @media (max-width: 768px) {
+            main { flex-direction: column; }
+            .w-1\/3 { 
+                width: 100% !important; 
+                max-height: 350px;
+                border-right: none !important;
+                border-bottom: 1px solid #e5e7eb;
+            }
+            .w-2\/3 { 
+                width: 100% !important; 
+                height: 400px !important;
+            }
+        }
+        /* Location accuracy indicator */
+        .accuracy-badge {
+            font-size: 9px;
+            padding: 2px 8px;
+            border-radius: 12px;
+            background: #f0fdf4;
+            color: #166534;
+        }
+        .accuracy-badge.poor {
+            background: #fef2f2;
+            color: #991b1b;
+        }
+    </style>
+</head>
+<body class="h-screen flex flex-col bg-gray-50">
+    
+    <!-- Header -->
+    <header class="bg-emerald-900 text-white p-4 shadow-lg flex items-center justify-between flex-wrap gap-2">
+        <div class="flex items-center gap-3">
+            <span class="text-2xl">🐾</span>
+            <span class="font-bold text-lg">Eco-Saviour Amdavad</span>
+            <span class="text-xs bg-emerald-700 px-3 py-1 rounded-full">Animal Hospital Finder</span>
+        </div>
+        <div class="flex items-center gap-2 text-sm">
+            <span class="opacity-75">Emergency Registry</span>
+            <span class="w-2 h-2 bg-green-400 rounded-full animate-pulse"></span>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="flex flex-1 overflow-hidden">
+        
+        <!-- Left Panel -->
+        <div class="w-1/3 p-4 bg-white border-r overflow-y-auto">
+            
+            <!-- Search Section -->
+            <div class="mb-4">
+                <label class="text-xs font-semibold text-gray-600 uppercase tracking-wider">Find Clinics</label>
+                <div class="flex gap-2 mt-1">
+                    <input type="text" id="addressInput" 
+                           placeholder="📍 City, area or address..." 
+                           class="flex-1 px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent">
+                    <button id="searchBtn" 
+                            class="px-4 py-2 bg-emerald-700 text-white rounded-lg text-sm font-semibold hover:bg-emerald-800 transition whitespace-nowrap">
+                        🔍 Search
+                    </button>
+                </div>
+                <button id="locateBtn" 
+                        class="w-full mt-2 px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-semibold hover:bg-blue-700 transition">
+                    📍 Use My Location
+                </button>
+                <div id="locationStatus" class="text-xs text-gray-500 mt-1.5 text-center hidden"></div>
+            </div>
+
+            <!-- Status Display -->
+            <div id="statusDisplay" 
+                 class="text-xs text-emerald-700 bg-emerald-50 p-2 rounded-lg mb-3 flex items-center gap-2">
+                <span class="w-2 h-2 bg-emerald-500 rounded-full animate-pulse"></span>
+                <span>Ready — enter a location or use GPS</span>
+            </div>
+
+            <!-- Results Header -->
+            <div class="flex justify-between items-center mb-3">
+                <h2 class="font-bold text-emerald-900 flex items-center gap-2">
+                    <span>🏥 Nearby Clinics</span>
+                    <span id="clinicCount" class="text-xs font-normal text-gray-500"></span>
+                </h2>
+                <button id="refreshBtn" 
+                        class="text-xs text-emerald-600 hover:text-emerald-800 font-medium">
+                    🔄 Refresh
+                </button>
+            </div>
+
+            <!-- Results List -->
+            <div id="results" class="space-y-3">
+                <div class="text-gray-400 text-sm text-center py-12">
+                    <div class="text-4xl mb-2">🔍</div>
+                    <p>Search for clinics near you</p>
+                    <p class="text-xs mt-1">Use the search above or your location</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Map -->
+        <div id="map" class="w-2/3 h-full"></div>
+    </main>
+
+    <script>
+        // ================================================================
+        // DJANGO CONTEXT VARIABLES
+        // ================================================================
+        const DEFAULT_LAT = {{ default_lat|default:"23.0225" }};
+        const DEFAULT_LON = {{ default_lon|default:"72.5714" }};
+        const DEFAULT_CITY = "{{ default_city|default:'Ahmedabad' }}";
+        const CSRF_TOKEN = '{{ csrf_token }}';
+
+        // ================================================================
+        // 1. INITIALIZE MAP
+        // ================================================================
+        const map = L.map('map').setView([DEFAULT_LAT, DEFAULT_LON], 13);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '&copy; <a href="https://openstreetmap.org">OpenStreetMap</a>',
+            maxZoom: 19
+        }).addTo(map);
+
+        let userMarker = null;
+        let userCircle = null;
+        let clinicMarkers = [];
+        let currentLat = DEFAULT_LAT;
+        let currentLon = DEFAULT_LON;
+        let currentAccuracy = null;
+
+        // Custom Icons
+        const clinicIcon = L.divIcon({
+            className: 'clinic-marker',
+            html: '🏥',
+            iconSize: [32, 32],
+            iconAnchor: [16, 32],
+            popupAnchor: [0, -32]
+        });
+
+        const userIcon = L.divIcon({
+            className: 'user-marker',
+            html: '📍',
+            iconSize: [32, 32],
+            iconAnchor: [16, 32],
+            popupAnchor: [0, -32]
+        });
+
+        // ================================================================
+        // 2. HELPER FUNCTIONS
+        // ================================================================
+        function haversineDistance(lat1, lon1, lat2, lon2) {
+            const R = 6371;
+            const dLat = (lat2 - lat1) * Math.PI / 180;
+            const dLon = (lon2 - lon1) * Math.PI / 180;
+            const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+                      Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+                      Math.sin(dLon/2) * Math.sin(dLon/2);
+            return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+        }
+
+        function getStatusElement() {
+            return document.getElementById('statusDisplay');
+        }
+
+        function getResultsElement() {
+            return document.getElementById('results');
+        }
+
+        function getCountElement() {
+            return document.getElementById('clinicCount');
+        }
+
+        // ================================================================
+        // 3. UPDATE USER LOCATION ON MAP
+        // ================================================================
+        function updateUserMarker(lat, lon, accuracy = null) {
+            // Remove old markers
+            if (userMarker) map.removeLayer(userMarker);
+            if (userCircle) map.removeLayer(userCircle);
+            
+            // Add new user marker
+            userMarker = L.marker([lat, lon], { icon: userIcon })
+                .bindPopup('📍 You are here' + (accuracy ? ` (Accuracy: ${Math.round(accuracy)}m)` : ''))
+                .addTo(map);
+            
+            // Add accuracy circle if available
+            if (accuracy && accuracy < 1000) {
+                userCircle = L.circle([lat, lon], {
+                    radius: accuracy,
+                    color: '#2563eb',
+                    fillColor: '#2563eb',
+                    fillOpacity: 0.1,
+                    weight: 1,
+                    dashArray: '5, 5'
+                }).addTo(map);
+            }
+            
+            // Update location status
+            const locationStatus = document.getElementById('locationStatus');
+            if (accuracy) {
+                locationStatus.className = 'text-xs text-center mt-1.5';
+                if (accuracy < 50) {
+                    locationStatus.innerHTML = '✅ High accuracy location (±' + Math.round(accuracy) + 'm)';
+                    locationStatus.className += ' text-green-600';
+                } else if (accuracy < 200) {
+                    locationStatus.innerHTML = '📍 Medium accuracy location (±' + Math.round(accuracy) + 'm)';
+                    locationStatus.className += ' text-blue-600';
+                } else {
+                    locationStatus.innerHTML = '⚠️ Low accuracy location (±' + Math.round(accuracy) + 'm) - Try moving outdoors';
+                    locationStatus.className += ' text-yellow-600';
+                }
+                locationStatus.classList.remove('hidden');
+            } else {
+                locationStatus.classList.add('hidden');
+            }
+        }
+
+        // ================================================================
+        // 4. API CALLS TO DJANGO BACKEND
+        // ================================================================
+        async function searchClinicsAPI(lat, lon, radius = 5000) {
+            try {
+                const response = await fetch('/api/search-clinics/', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': CSRF_TOKEN
+                    },
+                    body: JSON.stringify({ lat, lon, radius })
+                });
+                
+                const contentType = response.headers.get('content-type');
+                if (!contentType || !contentType.includes('application/json')) {
+                    const text = await response.text();
+                    console.error('Response is not JSON:', text.substring(0, 200));
+                    throw new Error('Server returned invalid response. Please check your API endpoints.');
+                }
+                
+                if (!response.ok) {
+                    const error = await response.json();
+                    throw new Error(error.error || `HTTP ${response.status}`);
+                }
+                
+                return await response.json();
+            } catch (error) {
+                console.error('API Error:', error);
+                throw error;
+            }
+        }
+
+        async function geocodeAddressAPI(address) {
+            try {
+                const response = await fetch('/api/geocode/', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': CSRF_TOKEN
+                    },
+                    body: JSON.stringify({ address })
+                });
+                
+                const contentType = response.headers.get('content-type');
+                if (!contentType || !contentType.includes('application/json')) {
+                    const text = await response.text();
+                    console.error('Response is not JSON:', text.substring(0, 200));
+                    throw new Error('Server returned invalid response. Please check your API endpoints.');
+                }
+                
+                if (!response.ok) {
+                    const error = await response.json();
+                    throw new Error(error.error || 'Geocoding failed');
+                }
+                
+                return await response.json();
+            } catch (error) {
+                console.error('Geocoding Error:', error);
+                throw error;
+            }
+        }
+
+        // ================================================================
+        // 5. MAIN RENDER FUNCTION
+        // ================================================================
+        async function renderClinics(lat, lon, locationLabel = 'Location', accuracy = null) {
+            const resultsDiv = getResultsElement();
+            const statusDiv = getStatusElement();
+            const countSpan = getCountElement();
+            
+            // Show loading state
+            statusDiv.innerHTML = `
+                <span class="w-2 h-2 bg-yellow-500 rounded-full animate-pulse"></span>
+                <span>🔍 Searching for veterinary clinics...</span>
+            `;
+            resultsDiv.innerHTML = `
+                <div class="text-center py-12">
+                    <div class="loading-spinner"></div>
+                    <p class="text-gray-500 text-sm">Loading clinics near you...</p>
+                </div>
+            `;
+            countSpan.textContent = '';
+
+            // Update user location on map
+            updateUserMarker(lat, lon, accuracy);
+            
+            // Center map on user
+            map.setView([lat, lon], 14);
+            currentLat = lat;
+            currentLon = lon;
+            currentAccuracy = accuracy;
+
+            try {
+                // Call Django API
+                const data = await searchClinicsAPI(lat, lon);
+                
+                if (!data.success) {
+                    throw new Error(data.error || 'Search failed');
+                }
+
+                const clinics = data.clinics || [];
+
+                // Clear old clinic markers
+                clinicMarkers.forEach(m => map.removeLayer(m));
+                clinicMarkers = [];
+
+                // No clinics found
+                if (clinics.length === 0) {
+                    resultsDiv.innerHTML = `
+                        <div class="text-center py-12">
+                            <div class="text-4xl mb-2">🏥</div>
+                            <p class="text-gray-500">No veterinary clinics found nearby</p>
+                            <p class="text-xs text-gray-400 mt-1">Try searching in a different area</p>
+                        </div>
+                    `;
+                    statusDiv.innerHTML = `
+                        <span class="w-2 h-2 bg-gray-400 rounded-full"></span>
+                        <span>📍 No clinics found within 5km</span>
+                    `;
+                    countSpan.textContent = '';
+                    return;
+                }
+
+                // Build results
+                const bounds = L.latLngBounds();
+                let html = '';
+                const maxDisplay = 20;
+
+                // Sort by distance
+                clinics.sort((a, b) => (a.distance || 999) - (b.distance || 999));
+
+                clinics.slice(0, maxDisplay).forEach((c) => {
+                    const distance = c.distance || haversineDistance(lat, lon, c.lat, c.lon);
+                    
+                    // Add marker
+                    const popupContent = `
+                        <div style="min-width:200px;">
+                            <strong style="font-size:16px;">${c.name}</strong><br>
+                            ${c.phone ? '📞 ' + c.phone + '<br>' : ''}
+                            ${c.hours ? '🕐 ' + c.hours + '<br>' : ''}
+                            ${c.address ? '📍 ' + c.address + '<br>' : ''}
+                            <span style="color:#2f6a84;font-size:13px;">${distance.toFixed(2)} km away</span>
+                            ${!c.is_osm ? '<br><span style="font-size:10px;color:#999;">📋 From registry</span>' : ''}
+                        </div>
+                    `;
+                    
+                    const marker = L.marker([c.lat, c.lon], { icon: clinicIcon })
+                        .bindPopup(popupContent)
+                        .addTo(map);
+                    clinicMarkers.push(marker);
+                    bounds.extend([c.lat, c.lon]);
+
+                    // Build card
+                    const isEmergency = c.hours && 
+                        (c.hours.toLowerCase().includes('24/7') || 
+                         c.hours.toLowerCase().includes('always') ||
+                         c.hours.toLowerCase().includes('open 24'));
+                    
+                    const isRegistered = !c.is_osm;
+                    
+                    html += `
+                        <div class="clinic-card p-4 border rounded-xl shadow-sm bg-white hover:border-emerald-500" 
+                             onclick="window.open('https://www.google.com/maps/dir/?api=1&destination=${c.lat},${c.lon}', '_blank')">
+                            <div class="flex justify-between items-start gap-2">
+                                <div class="flex-1 min-w-0">
+                                    <h3 class="font-bold text-emerald-800 text-sm flex items-center gap-1 flex-wrap">
+                                        ${c.name}
+                                        ${isEmergency ? '<span class="text-[8px] bg-red-100 text-red-700 px-2 py-0.5 rounded-full font-normal whitespace-nowrap">🚨 EMERGENCY</span>' : ''}
+                                        ${isRegistered ? '<span class="text-[8px] bg-gray-100 text-gray-500 px-2 py-0.5 rounded-full font-normal whitespace-nowrap">📋 REGISTERED</span>' : ''}
+                                    </h3>
+                                    ${c.hours ? `<p class="text-[10px] text-gray-500 mt-0.5">🕐 ${c.hours}</p>` : ''}
+                                    ${c.address ? `<p class="text-[9px] text-gray-400 mt-0.5 truncate">📍 ${c.address}</p>` : ''}
+                                </div>
+                                <span class="text-xs font-semibold text-emerald-600 bg-emerald-50 px-2 py-1 rounded-full whitespace-nowrap">
+                                    ${distance.toFixed(1)} km
+                                </span>
+                            </div>
+                            <div class="flex items-center gap-3 mt-1.5">
+                                ${c.phone ? `<a href="tel:${c.phone}" onclick="event.stopPropagation()" class="text-blue-600 text-[10px] font-bold underline">📞 Call</a>` : ''}
+                                <span class="text-[9px] text-gray-400">Click for directions →</span>
+                            </div>
+                        </div>
+                    `;
+                });
+
+                resultsDiv.innerHTML = html;
+                countSpan.textContent = `(${clinics.length} found)`;
+                
+                // Fit map to show all markers
+                bounds.extend([lat, lon]);
+                map.fitBounds(bounds, { padding: [50, 50], maxZoom: 15 });
+
+                const accuracyText = accuracy ? ` (Accuracy: ±${Math.round(accuracy)}m)` : '';
+                statusDiv.innerHTML = `
+                    <span class="w-2 h-2 bg-green-500 rounded-full"></span>
+                    <span>📍 <strong>${locationLabel}</strong>${accuracyText} — ${clinics.length} clinic${clinics.length !== 1 ? 's' : ''} found</span>
+                `;
+
+            } catch (err) {
+                console.error('Render Error:', err);
+                statusDiv.innerHTML = `
+                    <span class="w-2 h-2 bg-red-500 rounded-full"></span>
+                    <span class="text-red-600">❌ Error: ${err.message}</span>
+                `;
+                resultsDiv.innerHTML = `
+                    <div class="text-center py-12">
+                        <div class="text-4xl mb-2">⚠️</div>
+                        <p class="text-red-500 text-sm">Failed to load clinics</p>
+                        <p class="text-xs text-gray-400 mt-1">${err.message}</p>
+                        <button onclick="renderClinics(${lat}, ${lon}, '${locationLabel}', ${accuracy || 'null'})" 
+                                class="mt-3 px-4 py-1 bg-emerald-600 text-white rounded-lg text-xs">
+                            🔄 Retry
+                        </button>
+                    </div>
+                `;
+                countSpan.textContent = '';
+            }
+        }
+
+        // ================================================================
+        // 6. GET USER LOCATION WITH ACCURACY
+        // ================================================================
+        function getUserLocation() {
+            return new Promise((resolve, reject) => {
+                if (!navigator.geolocation) {
+                    reject(new Error('Geolocation is not supported by your browser.'));
+                    return;
+                }
+                
+                const statusDiv = getStatusElement();
+                statusDiv.innerHTML = `
+                    <span class="w-2 h-2 bg-yellow-500 rounded-full animate-pulse"></span>
+                    <span>📍 Getting your precise location...</span>
+                `;
+                
+                navigator.geolocation.getCurrentPosition(
+                    (pos) => {
+                        const { latitude, longitude, accuracy } = pos.coords;
+                        resolve({
+                            lat: latitude,
+                            lon: longitude,
+                            accuracy: accuracy
+                        });
+                    },
+                    (err) => {
+                        console.warn('Geolocation error:', err);
+                        reject(new Error('Could not get your location. Please allow location access or search manually.'));
+                    },
+                    { 
+                        enableHighAccuracy: true, 
+                        timeout: 15000,
+                        maximumAge: 30000
+                    }
+                );
+            });
+        }
+
+        // ================================================================
+        // 7. EVENT BINDINGS
+        // ================================================================
+        
+        // Search by address
+        document.getElementById('searchBtn').addEventListener('click', async () => {
+            const input = document.getElementById('addressInput').value.trim();
+            if (!input) {
+                alert('Please enter a city or address.');
+                return;
+            }
+            
+            const statusDiv = getStatusElement();
+            statusDiv.innerHTML = `
+                <span class="w-2 h-2 bg-yellow-500 rounded-full animate-pulse"></span>
+                <span>🔍 Geocoding "${input}"...</span>
+            `;
+            
+            try {
+                const result = await geocodeAddressAPI(input);
+                renderClinics(result.lat, result.lon, result.display_name);
+                document.getElementById('addressInput').value = result.display_name;
+            } catch (err) {
+                statusDiv.innerHTML = `
+                    <span class="w-2 h-2 bg-red-500 rounded-full"></span>
+                    <span class="text-red-600">❌ ${err.message}</span>
+                `;
+            }
+        });
+
+        // Enter key in search input
+        document.getElementById('addressInput').addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') {
+                document.getElementById('searchBtn').click();
+            }
+        });
+
+        // Use my location - IMPROVED
+        document.getElementById('locateBtn').addEventListener('click', async () => {
+            try {
+                const location = await getUserLocation();
+                renderClinics(location.lat, location.lon, 'Your Location', location.accuracy);
+                document.getElementById('addressInput').value = '📍 Current location (GPS)';
+            } catch (err) {
+                const statusDiv = getStatusElement();
+                statusDiv.innerHTML = `
+                    <span class="w-2 h-2 bg-red-500 rounded-full"></span>
+                    <span class="text-red-600">❌ ${err.message}</span>
+                `;
+                alert(err.message);
+            }
+        });
+
+        // Refresh button
+        document.getElementById('refreshBtn').addEventListener('click', () => {
+            if (currentLat && currentLon) {
+                renderClinics(currentLat, currentLon, 'Refreshed Location', currentAccuracy);
+            }
+        });
+
+        // ================================================================
+        // 8. AUTO-LOAD ON PAGE START (IMPROVED)
+        // ================================================================
+        async function initializeApp() {
+            try {
+                // Try to get user location with high accuracy
+                const location = await getUserLocation();
+                renderClinics(location.lat, location.lon, 'Your Location', location.accuracy);
+                document.getElementById('addressInput').value = '📍 Current location (GPS)';
+            } catch (err) {
+                console.warn('Could not get location:', err.message);
+                // Fallback to Ahmedabad center
+                renderClinics(DEFAULT_LAT, DEFAULT_LON, DEFAULT_CITY + ' (default)');
+                document.getElementById('addressInput').value = DEFAULT_CITY + ', Gujarat';
+                
+                // Show a subtle message
+                const statusDiv = getStatusElement();
+                statusDiv.innerHTML = `
+                    <span class="w-2 h-2 bg-yellow-500 rounded-full"></span>
+                    <span>📍 Using default location (${DEFAULT_CITY}) — Click "Use My Location" for GPS</span>
+                `;
+            }
+        }
+
+        // Start the app
+        initializeApp();
+    </script>
+</body>
+</html>

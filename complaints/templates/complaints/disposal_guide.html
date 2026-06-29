@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>♻️ Eco-Saviour | Smart Disposal Guide</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .danger-critical { background: #fee2e2; color: #991b1b; border-left: 4px solid #dc2626; }
+        .danger-high { background: #fef3c7; color: #92400e; border-left: 4px solid #f59e0b; }
+        .danger-moderate { background: #fef9c3; color: #854d0e; border-left: 4px solid #eab308; }
+        .danger-low { background: #d1fae5; color: #065f46; border-left: 4px solid #10b981; }
+        
+        .filter-btn {
+            padding: 4px 14px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 600;
+            border: 2px solid #e5e7eb;
+            background: white;
+            color: #4b5563;
+            transition: all 0.3s;
+            cursor: pointer;
+        }
+        .filter-btn:hover { border-color: #064e3b; color: #064e3b; }
+        .filter-btn.active { background: #064e3b; border-color: #064e3b; color: white; }
+        
+        .guide-card {
+            transition: all 0.3s ease;
+            border: 1px solid #f0f0f0;
+            background: white;
+        }
+        .guide-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 30px rgba(0,0,0,0.10);
+        }
+        @media (max-width: 768px) {
+            .guide-card { padding: 16px !important; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Header -->
+    <header class="bg-emerald-900 text-white p-3 shadow-lg">
+        <div class="max-w-7xl mx-auto flex items-center justify-between flex-wrap gap-2">
+            <div class="flex items-center gap-2">
+                <span class="text-2xl">♻️</span>
+                <span class="font-bold">Eco-Saviour Amdavad</span>
+            </div>
+            <nav class="flex items-center gap-3 text-sm">
+                <a href="/animal-hospitals/" class="hover:text-emerald-200 transition">🏥 Clinics</a>
+                <a href="/problems-solutions/" class="hover:text-emerald-200 transition">🌍 Problems</a>
+                <a href="#" class="text-emerald-200 font-semibold">♻️ Disposal</a>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Main -->
+    <main class="max-w-7xl mx-auto px-4 py-6">
+
+        <!-- Hero -->
+        <section class="text-center mb-8">
+            <h1 class="text-2xl md:text-3xl font-bold text-emerald-900">♻️ Smart Disposal Guide</h1>
+            <p class="text-gray-600 text-sm max-w-xl mx-auto">Learn how to properly dispose of different types of waste to protect the environment and animals</p>
+            <div class="flex flex-wrap justify-center gap-1 mt-3" id="filterContainer">
+                <button class="filter-btn active" data-filter="all">All</button>
+                <button class="filter-btn" data-filter="E-Waste">💻 E-Waste</button>
+                <button class="filter-btn" data-filter="Plastic Waste">🛍️ Plastic</button>
+                <button class="filter-btn" data-filter="Medical Waste">💊 Medical</button>
+                <button class="filter-btn" data-filter="Glass Waste">🍾 Glass</button>
+                <button class="filter-btn" data-filter="Metals">🔩 Metals</button>
+                <button class="filter-btn" data-filter="Organic Waste">🥕 Organic</button>
+                <button class="filter-btn" data-filter="Hazardous Waste">☣️ Hazardous</button>
+                <button class="filter-btn" data-filter="Textile Waste">👕 Textile</button>
+                <button class="filter-btn" data-filter="Other Waste">📦 Other</button>
+            </div>
+        </section>
+
+        <!-- Stats -->
+        <section class="grid grid-cols-2 md:grid-cols-4 gap-3 mb-8">
+            <div class="stat-card bg-white p-4 rounded-xl text-center shadow">
+                <div class="text-2xl">♻️</div>
+                <div class="text-xl font-bold text-emerald-900">{{ guide_items|length }}</div>
+                <div class="text-xs text-gray-500">Total Items</div>
+            </div>
+            <div class="stat-card bg-white p-4 rounded-xl text-center shadow">
+                <div class="text-2xl">🔴</div>
+                <div class="text-xl font-bold text-red-600">{{ guide_items|length }}</div>
+                <div class="text-xs text-gray-500">Critical Items</div>
+            </div>
+            <div class="stat-card bg-white p-4 rounded-xl text-center shadow">
+                <div class="text-2xl">🟡</div>
+                <div class="text-xl font-bold text-yellow-600">{{ guide_items|length }}</div>
+                <div class="text-xs text-gray-500">High Risk Items</div>
+            </div>
+            <div class="stat-card bg-white p-4 rounded-xl text-center shadow">
+                <div class="text-2xl">🟢</div>
+                <div class="text-xl font-bold text-green-600">{{ guide_items|length }}</div>
+                <div class="text-xs text-gray-500">Low Risk Items</div>
+            </div>
+        </section>
+
+        <!-- Guide Items Grid -->
+        <section>
+            <div class="flex justify-between items-center mb-3">
+                <h2 class="text-lg font-bold text-emerald-900">📋 Disposal Guide</h2>
+                <span id="resultCount" class="text-xs text-gray-500"></span>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4" id="guideGrid">
+                <!-- JavaScript will populate this -->
+            </div>
+        </section>
+
+        <!-- Tips -->
+        <section class="mt-10 bg-gradient-to-r from-emerald-900 to-emerald-700 rounded-xl p-6 text-white text-center">
+            <h2 class="text-lg font-bold">💡 Quick Disposal Tips</h2>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4 text-left">
+                <div class="bg-white/10 p-4 rounded-lg backdrop-blur">
+                    <div class="text-2xl">🏠</div>
+                    <h3 class="font-semibold mt-1">Segregate at Home</h3>
+                    <p class="text-xs text-emerald-100 mt-1">Use separate bins for dry, wet, and hazardous waste</p>
+                </div>
+                <div class="bg-white/10 p-4 rounded-lg backdrop-blur">
+                    <div class="text-2xl">♻️</div>
+                    <h3 class="font-semibold mt-1">Rethink Before Buying</h3>
+                    <p class="text-xs text-emerald-100 mt-1">Choose products with minimal packaging and longer lifespan</p>
+                </div>
+                <div class="bg-white/10 p-4 rounded-lg backdrop-blur">
+                    <div class="text-2xl">🌍</div>
+                    <h3 class="font-semibold mt-1">Spread Awareness</h3>
+                    <p class="text-xs text-emerald-100 mt-1">Share disposal knowledge with family and neighbors</p>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-gray-900 text-gray-400 text-center py-3 mt-4 text-xs">
+        <p>© 2024 Eco-Saviour Amdavad | Together for a Greener Future 🌿</p>
+    </footer>
+
+    <script>
+        // ================================================================
+        // DATA FROM DJANGO
+        // ================================================================
+        const guideItems = {{ guide_items|safe }};
+
+        // ================================================================
+        // RENDER FUNCTION
+        // ================================================================
+        let currentFilter = 'all';
+
+        function renderItems(filter = 'all') {
+            const grid = document.getElementById('guideGrid');
+            const resultCount = document.getElementById('resultCount');
+            if (!grid) return;
+
+            let filtered = filter === 'all' ? guideItems : 
+                guideItems.filter(item => item.category === filter);
+
+            resultCount.textContent = `Showing ${filtered.length} of ${guideItems.length} items`;
+
+            if (filtered.length === 0) {
+                grid.innerHTML = `
+                    <div class="col-span-full text-center py-8">
+                        <div class="text-3xl mb-2">🔍</div>
+                        <p class="text-gray-500 text-sm">No items found for this category</p>
+                    </div>
+                `;
+                return;
+            }
+
+            grid.innerHTML = filtered.map((item) => {
+                const dangerClass = {
+                    'CRITICAL': 'danger-critical',
+                    'HIGH': 'danger-high',
+                    'MODERATE': 'danger-moderate',
+                    'LOW': 'danger-low'
+                }[item.danger_level] || '';
+
+                const dangerEmoji = {
+                    'CRITICAL': '🔴',
+                    'HIGH': '🟡',
+                    'MODERATE': '🟠',
+                    'LOW': '🟢'
+                }[item.danger_level] || '🟢';
+
+                return `
+                    <div class="guide-card p-4 rounded-xl ${dangerClass}">
+                        <div class="flex justify-between items-start gap-2">
+                            <div class="flex-1">
+                                <div class="flex items-center gap-2 flex-wrap">
+                                    <span class="text-lg">${dangerEmoji}</span>
+                                    <h3 class="font-bold text-emerald-900 text-sm">${item.item}</h3>
+                                    <span class="text-xs px-2 py-0.5 bg-gray-200 rounded-full text-gray-600">${item.category}</span>
+                                </div>
+                                <p class="text-xs text-gray-600 mt-1">⚠️ ${item.impact}</p>
+                            </div>
+                            <span class="text-xs font-bold whitespace-nowrap ${dangerClass.replace('bg-', 'text-')}">
+                                ${item.danger_level}
+                            </span>
+                        </div>
+                        <div class="mt-2 pt-2 border-t border-gray-200">
+                            <div class="flex items-start gap-1">
+                                <span class="text-xs font-semibold text-emerald-700">✅ Action:</span>
+                                <span class="text-xs text-gray-700">${item.action}</span>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // ================================================================
+        // FILTERS
+        // ================================================================
+        document.querySelectorAll('.filter-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+                this.classList.add('active');
+                renderItems(this.dataset.filter);
+            });
+        });
+
+        // ================================================================
+        // INIT
+        // ================================================================
+        document.addEventListener('DOMContentLoaded', () => {
+            renderItems('all');
+        });
+    </script>
+
+</body>
+</html>
